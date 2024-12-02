@@ -6,5 +6,6 @@ export interface DatabaseConfig {
   password: string;
   database: string;
   entities: string[];
+  autoLoadEntities: boolean,
   synchronize: boolean;
 }

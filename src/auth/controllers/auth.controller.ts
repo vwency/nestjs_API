@@ -27,7 +27,9 @@ export class AuthController {
   @Post('register')
   @UsePipes(new ValidationPipe())
   async register(@Body() userDto: UserDto) {
+
     await this.UserService.createUser(userDto);
+
     return await this.authService.signPayload(userDto);
   }
 }

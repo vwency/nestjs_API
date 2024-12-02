@@ -9,8 +9,9 @@ const dbConfig: DatabaseConfig = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [__dirname + '/../**/*.entity{.js,.ts}'], // Правильный синтаксис для автоматического обнаружения Entity-классов
-  synchronize: false, // Установите false в продакшене
+  entities: [__dirname + '/../**/*.entity{.js,.ts}'],
+  autoLoadEntities: true,
+  synchronize: true, // Установите false в продакшене
 };
 
 export default dbConfig;
