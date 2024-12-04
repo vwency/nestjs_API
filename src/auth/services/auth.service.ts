@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from '../dto/user.dto';
 import { UserService } from 'src/crud/user/services/user.service';
 import { UUID } from 'crypto';
-import { JwtStrategy } from '../strategys/auth.strategy';
+import { JwtStrategy } from '../strategys/jwt.strategy';
 
 @Injectable()
 export class JwtAuthService {
@@ -44,7 +44,7 @@ export class JwtAuthService {
     if (!isValidUser) throw new BadRequestException("Err");
 
     const payload = { username: userDto.username, password: userDto.password};
-    return await this.jwtService.sign(payload);
+    return this.jwtService.sign(payload);
   }
 
 }

@@ -23,7 +23,7 @@ export class CommentsController {
     return await this.commentService.createComment(id, column_name, card_name, comment_name);
   }
 
-  @ApiTags('get_comment')
+  @ApiTags('Get comment')
   @Get(':comment_name')
   @UsePipes(new ValidationPipe())
   async getComment(@Param() comDto: CommnetDto) {
@@ -32,7 +32,7 @@ export class CommentsController {
 
   }
 
-  @ApiTags('delete_comment')
+  @ApiTags('Delete comment')
   @Delete(':comment_name')
   @UsePipes(new ValidationPipe())
   async deleteComment(@Param() comDto: CommnetDto) {
@@ -40,7 +40,7 @@ export class CommentsController {
     return await this.commentService.deleteCommentq(comDto);
   }
 
-  @ApiTags('update_comment')
+  @ApiTags('Update comment')
   @Put(':comment_name')
   @UsePipes(new ValidationPipe())
   async updateComments(@Param() comDto: CommnetDto, @Body('new_name') new_name: string) {

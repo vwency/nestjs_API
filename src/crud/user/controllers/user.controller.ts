@@ -12,8 +12,7 @@ export class UserController {
 
     ) {}
 
-    @ApiTags('Get_allUsers')
-    
+    @ApiTags('Get all Users')
     @Get('all')
     @UsePipes(new ValidationPipe())
     async get_allUser(){
@@ -22,7 +21,7 @@ export class UserController {
       
     }
     
-    @ApiTags('get_user')
+    @ApiTags('Get user')
     @Get(':id')
     @UsePipes(new ValidationPipe())
     async id_get(@Param() indDto: IdDto) {

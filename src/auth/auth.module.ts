@@ -14,7 +14,7 @@ import { Comments } from 'src/database/schema/comment.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { CommentsService } from 'src/crud/comment/services/comments.service';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './strategys/auth.strategy';
+import { JwtStrategy } from './strategys/jwt.strategy';
 import { LocalStrategy } from './strategys/local.strategy';
 
 @Module({

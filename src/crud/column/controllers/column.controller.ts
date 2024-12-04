@@ -12,7 +12,7 @@ export class ColumnController {
 
   ) { }
 
-  @ApiTags('get_column')
+  @ApiTags('Get column')
   @Get(':column_name')
   @UsePipes(new ValidationPipe())
   async findUserColumns(@Param() colDto: ColumnDto) {
@@ -21,22 +21,21 @@ export class ColumnController {
 
   }
 
-  @ApiTags('delete_column')
+  @ApiTags('Delete column')
   @Delete(':column_name')
   @UsePipes(new ValidationPipe())
   async DeleteColumn(@Param() colDto: ColumnDto) {
     return await this.ColumnService.deleteColumn(colDto);
   }
 
-
-  @ApiTags('create_column')
+  @ApiTags('Create column')
   @Post('add')
   @UsePipes(new ValidationPipe())
   async createColumn(@Param('id') id: ColumnDto["id"], @Body('column_name') column_name: ColumnDto["column_name"]) {
     return await this.ColumnService.createColumn(id, column_name);
   }
 
-  @ApiTags('update_column')
+  @ApiTags('Update column')
   @Put(':column_name')
   @UsePipes(new ValidationPipe())
   async updateColumn(@Param() colDto: ColumnDto, @Body('new_name') new_name: string) {

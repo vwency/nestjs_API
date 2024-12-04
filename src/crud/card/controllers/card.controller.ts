@@ -11,7 +11,7 @@ export class CardController {
     private readonly cardService: CardService,
   ) { }
 
-  @ApiTags('create_card')
+  @ApiTags('Create card')
   @Post('add')
   @UsePipes(new ValidationPipe())
   async createCards(@Param('id') id: ColumnDto["id"], @Param('column_name') column_name: ColumnDto["column_name"], @Body('card_name') card_name: string) {
@@ -19,7 +19,7 @@ export class CardController {
   }
 
 
-  @ApiTags('get_card')
+  @ApiTags('Get card')
   @Get(':card_name')
   @UsePipes(new ValidationPipe())
   async getCards(@Param() cardDto: CardDto) {
@@ -27,14 +27,14 @@ export class CardController {
   }
 
 
-  @ApiTags('delete_card')
+  @ApiTags('Delete card')
   @Delete(':card_name')
   @UsePipes(new ValidationPipe())
   async deleteCard(@Param() cardDto: CardDto) {
     return await this.cardService.deleteCard(cardDto);
   }
 
-  @ApiTags('update_card')
+  @ApiTags('Update card')
   @Put(':card_name')
   @UsePipes(new ValidationPipe())
   async updateCards(@Param() cardDto: CardDto, @Body('new_name') new_name: string) {

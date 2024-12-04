@@ -14,7 +14,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(username: string, password: string) {
-    console.log('Inside LocalStrategy');
     console.log(password);
     const user = this.JwtAuthService.validateUserJwt({ username, password });
     if (!user) throw new UnauthorizedException();
