@@ -4,7 +4,6 @@ import { UsePipes } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CommnetDto } from '../dto/comment.dto';
 import { CommentsService } from '../services/comments.service';
-import { OwnerGuard } from '../../../auth/guards/owner.guard';
 
 @Controller('user/:id/columns/:column_name/cards/:card_name/comments/')
 export class CommentsController {
@@ -13,7 +12,6 @@ export class CommentsController {
   ) { }
 
   @ApiTags('create_comment')
-  @UseGuards(OwnerGuard)
   @Post('add')
   @UsePipes(new ValidationPipe())
   async addComment(
@@ -26,7 +24,6 @@ export class CommentsController {
   }
 
   @ApiTags('get_comment')
-  @UseGuards(OwnerGuard)
   @Get(':comment_name')
   @UsePipes(new ValidationPipe())
   async getComment(@Param() comDto: CommnetDto) {
@@ -36,7 +33,6 @@ export class CommentsController {
   }
 
   @ApiTags('delete_comment')
-  @UseGuards(OwnerGuard)
   @Delete(':comment_name')
   @UsePipes(new ValidationPipe())
   async deleteComment(@Param() comDto: CommnetDto) {
@@ -45,7 +41,6 @@ export class CommentsController {
   }
 
   @ApiTags('update_comment')
-  @UseGuards(OwnerGuard)
   @Put(':comment_name')
   @UsePipes(new ValidationPipe())
   async updateComments(@Param() comDto: CommnetDto, @Body('new_name') new_name: string) {

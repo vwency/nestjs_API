@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from '../dto/user.dto';
 import { UserService } from 'src/crud/user/services/user.service';
 import { UUID } from 'crypto';
+import { JwtStrategy } from '../strategys/auth.strategy';
 
 @Injectable()
 export class JwtAuthService {
@@ -16,37 +17,27 @@ export class JwtAuthService {
     private readonly UserService: UserService,
   ) { }
 
-  async validateUser2(username1: string, user_id: UUID) {
-    const user = await this.userRepository.findOne({ where: { username: username1, user_id: user_id } });
-    if (!user) {
-      return false;
-    }
-    return true;
+  async validateUser2(UserDto: UserDto) {
+
+    return !!(await this.userRepository.findOne({ where: { username: UserDto.username } }));
   }
 
   async validateToken(token: string): Promise<boolean> {
     try {
       const decoded = await this.jwtService.verify(token);
-      const user = await this.userRepository.findOne({ where: { username: decoded.username } });
-
-      if (!user) {
-        return false;
-      }
-    } catch (error) {
+      return !!(await this.userRepository.findOne({ where: { username: decoded.username } }));
+    } catch {
       return false;
     }
-    return true;
   }
 
 
-
-
   async signPayload(userDto: UserDto): Promise<any> {
+    
     const isValidUser = await this.UserService.validateUser(userDto);
-    if (!isValidUser) {
-      throw new BadRequestException("Err");
-    }
-    const payload = { username: userDto.username };
+    if (!isValidUser) throw new BadRequestException("Err");
+
+    const payload = { username: userDto.username, password: userDto.password};
     return this.jwtService.sign(payload);
   }
 

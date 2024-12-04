@@ -27,37 +27,21 @@ export class UserService {
 
   async getUser(user_id: uuidv4): Promise<string> {
     const user = await this.userRepository.findOne({ where: { user_id } });
-    if (user) { 
-      return JSON.stringify(user);
-    } 
-    throw new NotFoundException("User not found");
+    if (!user) throw new NotFoundException("User not found");
+    return JSON.stringify(user);
   }
   
   async validateUser(userDto: UserDto): Promise<boolean> {
-    if (!this.userRepository) {
-      throw new Error('userRepository is not defined or is undefined');
-    }
-
-    const user = await this.userRepository.findOne({ where: { username: userDto.username, password: userDto.password } });
-    return !!user; 
+    return !!(await this.userRepository.findOne({ where: { username: userDto.username } })); 
   }
 
   async createUser(userDto: UserDto): Promise<any> {
-
-    const user_exist = await this.validateUser(userDto);
-
-    if(user_exist) throw new BadRequestException("User existed");
-
-    try {
-      const newUser = await this.userRepository.create(userDto);
-      await this.userRepository.save(newUser);
-      
-      if(newUser){
-        return newUser;
-      }
-      
-    } catch (error) {
-      throw new Error('User registration failed: ' + error.message);
+    if (await this.validateUser(userDto)) {
+      throw new BadRequestException("User already exists");
     }
+    
+    const newUser = this.userRepository.create(userDto);
+    return this.userRepository.save(newUser);
   }
+
 }

@@ -4,10 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export class CommnetDto {
+
   @ApiProperty()
-  @IsUUID()
-  id: uuidv4;
-  
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -17,6 +19,10 @@ export class CommnetDto {
   @IsString()
   @IsNotEmpty()
   card_name: string;
+
+  @ApiProperty()
+  @IsUUID()
+  id: uuidv4;
 
   @ApiProperty()
   @IsString()

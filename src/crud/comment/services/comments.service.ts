@@ -24,9 +24,7 @@ export class CommentsService {
   ) { }
 
   async commentExisted(user_id: uuidv4, column_name: string, card_name: string, comment_name: string): Promise<boolean> {
-    if (!this.cardRepository) {
-      throw new Error('cardRepository is not defined or is undefined');
-    }
+    if (!this.cardRepository) throw new Error('cardRepository is not defined or is undefined');
 
     const column = await this.columnRepository.findOne({ where: { user_id, column_name } });
     const column_id = column?.column_id;
@@ -41,14 +39,10 @@ export class CommentsService {
 
   async getComment(comDto: CommnetDto): Promise<string> {
 
-    if (!this.cardRepository) {
-      throw new Error('cardRepository is not defined or is undefined');
-    }
+    if (!this.cardRepository) throw new Error('cardRepository is not defined or is undefined');
 
-    const commentExisted = await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name);
-    if (!commentExisted) {
-      throw new NotFoundException("comment not found");
-    }
+    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) throw new NotFoundException("comment not found");
+
     const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
     const column_id = column?.column_id;
 
@@ -68,41 +62,34 @@ export class CommentsService {
     const card_id = card?.card_id;
     if (!column_id) return false;
     const newComment = this.commentRepository.create({ user_id, card_id, column_id, comment_name });
-    const createdComment = await this.commentRepository.save(newComment);
-    if (!createdComment) {
-      throw new BadRequestException("Failed create comment!");
-    }
-    else {
-      return { message: 'Comment created successfully' };
-    }
+
+    if (await this.commentRepository.save(newComment)) return { message: 'Comment created successfully' };
+      
+    throw new BadRequestException("Failed create comment!");
+  
   }
 
   async deleteCommentq(comDto: CommnetDto): Promise<any> {
-    const commentExisted = await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name);
-    if (!commentExisted) {
+
+    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) {
       throw new NotFoundException("comment not found");
     }
+
     const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
     const column_id = column?.column_id;
     const card = await this.cardRepository.findOne({ where: { user_id: comDto.id, column_id, card_name: comDto.card_name } });
     const card_id = card?.card_id;
     const deleted = await this.commentRepository.delete({ user_id: comDto.id, column_id, card_id, comment_name: comDto.comment_name });
-    if (deleted) {
-      return { message: 'Comment     deleted successfully' };
-    }
+    if (deleted) return { message: 'Comment deleted successfully' };
     throw new BadRequestException("Delete error");
   }
 
   async updateComment(comDto: CommnetDto, new_name: string): Promise<any> {
 
-    if (!this.cardRepository) {
-      throw new Error('cardRepository is not defined or is undefined');
-    }
-
-    const commentExisted = await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name);
-    if (!commentExisted) {
+    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) {
       throw new NotFoundException("comment not found");
     }
+    
     const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
     const column_id = column?.column_id;
 

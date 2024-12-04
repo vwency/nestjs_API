@@ -15,27 +15,25 @@ export class ColumnService {
     private readonly columnRepository: Repository<Columns>,
   ) { }
 
+  async checkColumn(colDto: ColumnDto){
+    const ExistColumn = await this.ExistedColumnData(colDto);
+    if (!ExistColumn) throw new BadRequestException("Column not found");
+  }
 
   async GetColumnData(colDto: ColumnDto): Promise<string> {
-    const ExistColumn = await this.ExistedColumnData(colDto);
-    if (!ExistColumn) {
-      throw new BadRequestException("Column not found");
-    }
+    await this.checkColumn(colDto);
     const columnEx = await this.columnRepository.findOne({ where: { user_id: colDto.id, column_name: colDto.column_name } });
     return JSON.stringify(columnEx);
   }
 
   async deleteColumn(colDto: ColumnDto): Promise<any> {
-    const ExistColumn = await this.ExistedColumnData(colDto);
-    if (!ExistColumn) {
-      throw new NotFoundException("Column not found");
-    }
+
+    await this.checkColumn(colDto);
     const deletedColumn = await this.columnRepository.delete({ user_id: colDto.id, column_name: colDto.column_name });
     const deleted = !!deletedColumn.affected;
-    if (deleted) {
-      return { message: 'Column deleted successfully' };
-    }
+    if (deleted) return { message: 'Column deleted successfully' };
     throw new BadRequestException("Delete error");
+
   }
 
   async ExistedColumnData(colDto: ColumnDto): Promise<Boolean> {
@@ -44,13 +42,13 @@ export class ColumnService {
   }
 
   async createColumn(user_id: uuidv4, column_name: string): Promise<any> {
+
     const newColumn = this.columnRepository.create({ user_id, column_name });
     const createdColumn = await this.columnRepository.save(newColumn);
-    if (createdColumn) {
-      return { message: 'Column created successfully' };
-    }
+    if (createdColumn) return { message: 'Column created successfully' };
     throw new BadRequestException("Create error");
   }
+
   async updateColumn(colDto: ColumnDto, new_name: string) {
     const columnEx = await this.columnRepository.findOne({ where: { user_id: colDto.id, column_name: colDto.column_name } });
     columnEx.column_name = new_name;
