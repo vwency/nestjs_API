@@ -17,28 +17,34 @@ export class JwtAuthService {
     private readonly UserService: UserService,
   ) { }
 
-  async validateUser2(UserDto: UserDto) {
 
-    return !!(await this.userRepository.findOne({ where: { username: UserDto.username } }));
+  async validateUserJwt({ username, password }: UserDto){
+
+    const findUser = await this.userRepository.findOne({ where: { username: username } });
+
+    if (!findUser) return null;
+    if (password === findUser.password) {
+      const { password, ...user } = findUser;
+      return this.jwtService.sign(user);
+    }
+    
   }
 
   async validateToken(token: string): Promise<boolean> {
-    try {
-      const decoded = await this.jwtService.verify(token);
-      return !!(await this.userRepository.findOne({ where: { username: decoded.username } }));
-    } catch {
-      return false;
-    }
+
+    const decoded = await this.jwtService.verify(token);
+    return !!(await this.userRepository.findOne({ where: { username: decoded.username } }));
+
   }
 
 
   async signPayload(userDto: UserDto): Promise<any> {
-    
+
     const isValidUser = await this.UserService.validateUser(userDto);
     if (!isValidUser) throw new BadRequestException("Err");
 
     const payload = { username: userDto.username, password: userDto.password};
-    return this.jwtService.sign(payload);
+    return await this.jwtService.sign(payload);
   }
 
 }

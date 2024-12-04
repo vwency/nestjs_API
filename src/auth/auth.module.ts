@@ -15,6 +15,7 @@ import { Cards } from 'src/database/schema/card.entity';
 import { CommentsService } from 'src/crud/comment/services/comments.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategys/auth.strategy';
+import { LocalStrategy } from './strategys/local.strategy';
 
 @Module({
   imports: [
@@ -31,6 +32,6 @@ import { JwtStrategy } from './strategys/auth.strategy';
   ],
   controllers: [AuthController],
   exports: [JwtAuthService, JwtModule],
-  providers: [JwtAuthService, UserService, JwtStrategy]
+  providers: [JwtAuthService, UserService, JwtStrategy, LocalStrategy]
 })
 export class AuthModule { }
