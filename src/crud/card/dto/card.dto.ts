@@ -7,10 +7,6 @@ export class CardDto {
 
   @ApiProperty()
   @IsString()
-  username: string;
-
-  @ApiProperty()
-  @IsString()
   column_name: string;
 
   @ApiProperty()
@@ -20,4 +16,8 @@ export class CardDto {
   @ApiProperty()
   @IsString()
   card_name: string;
+
+  @ApiProperty()
+  @IsString()
+  description: string;
 }

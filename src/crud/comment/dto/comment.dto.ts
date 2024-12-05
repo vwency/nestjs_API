@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 
 
-export class CommnetDto {
+export class CommentDto {
 
   @ApiProperty()
   @IsString()
@@ -28,4 +28,15 @@ export class CommnetDto {
   @IsString()
   @IsNotEmpty()
   comment_name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  new_name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
 }

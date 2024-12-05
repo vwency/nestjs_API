@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Users } from '../../../database/schema/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,44 +17,54 @@ export class ColumnService {
     private readonly userRepository: Repository<Users>,
     @InjectRepository(Columns)
     private readonly columnRepository: Repository<Columns>,
-  ) { }
+  ) {}
 
-  async checkColumn(colDto: ColumnDto){
-    const ExistColumn = await this.ExistedColumnData(colDto);
-    if (!ExistColumn) throw new BadRequestException("Column not found");
+  async checkColumn(ColumnDto: ColumnDto) {
+    const ExistColumn = await this.ExistedColumnData(ColumnDto);
+    if (!ExistColumn) throw new BadRequestException('Column not found');
   }
 
-  async GetColumnData(colDto: ColumnDto): Promise<string> {
-    await this.checkColumn(colDto);
-    const columnEx = await this.columnRepository.findOne({ where: { user_id: colDto.id, column_name: colDto.column_name } });
+  async GetColumnData(ColumnDto: ColumnDto): Promise<string> {
+    await this.checkColumn(ColumnDto);
+    const columnEx = await this.columnRepository.findOne({
+      where: { user_id: ColumnDto.id, column_name: ColumnDto.column_name },
+    });
     return JSON.stringify(columnEx);
   }
 
-  async deleteColumn(colDto: ColumnDto): Promise<any> {
-
-    await this.checkColumn(colDto);
-    const deletedColumn = await this.columnRepository.delete({ user_id: colDto.id, column_name: colDto.column_name });
+  async deleteColumn(ColumnDto: ColumnDto): Promise<any> {
+    await this.checkColumn(ColumnDto);
+    const deletedColumn = await this.columnRepository.delete({
+      user_id: ColumnDto.id,
+      column_name: ColumnDto.column_name,
+    });
     const deleted = !!deletedColumn.affected;
     if (deleted) return { message: 'Column deleted successfully' };
-    throw new BadRequestException("Delete error");
-
+    throw new BadRequestException('Delete error');
   }
 
-  async ExistedColumnData(colDto: ColumnDto): Promise<Boolean> {
-    const columnEx = await this.columnRepository.findOne({ where: { user_id: colDto.id, column_name: colDto.column_name } });
+  async ExistedColumnData(ColumnDto: ColumnDto): Promise<Boolean> {
+    const columnEx = await this.columnRepository.findOne({
+      where: { user_id: ColumnDto.id, column_name: ColumnDto.column_name },
+    });
     return !!columnEx;
   }
 
-  async createColumn(user_id: uuidv4, column_name: string): Promise<any> {
-
-    const newColumn = this.columnRepository.create({ user_id, column_name });
+  async createColumn(ColumnDto: ColumnDto): Promise<any> {
+    const newColumn = this.columnRepository.create({
+      user_id: ColumnDto.id,
+      column_name: ColumnDto.column_name,
+      description: ColumnDto.description
+    });
     const createdColumn = await this.columnRepository.save(newColumn);
     if (createdColumn) return { message: 'Column created successfully' };
-    throw new BadRequestException("Create error");
+    throw new BadRequestException('Create error');
   }
 
-  async updateColumn(colDto: ColumnDto, new_name: string) {
-    const columnEx = await this.columnRepository.findOne({ where: { user_id: colDto.id, column_name: colDto.column_name } });
+  async updateColumn(ColumnDto: ColumnDto, new_name: string) {
+    const columnEx = await this.columnRepository.findOne({
+      where: { user_id: ColumnDto.id, column_name: ColumnDto.column_name },
+    });
     columnEx.column_name = new_name;
     await this.columnRepository.save(columnEx);
     return true;

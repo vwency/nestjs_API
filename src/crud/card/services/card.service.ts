@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { CardDto } from '../dto/card.dto';
+import { ColumnDto } from 'src/crud/column/dto/column.dto';
 
 @Injectable()
 export class CardService {
@@ -20,20 +21,39 @@ export class CardService {
     ) { }
 
 
-    async createCard(user_id: any, column_name: string, card_name: string): Promise<any> {
-
-        const column = await this.columnRepository.findOne({ where: { user_id, column_name } });
-        const column_id = column?.column_id;
-
-        const cardExisted = await this.cardRepository.findOne({ where: { user_id: user_id, column_id: column_name, card_name: card_name } });
-        if (!cardExisted) throw new BadRequestException("Card arleady existed!");
-        
-
-        const newCard = this.cardRepository.create({ user_id, card_name, column_id });
-        const createdCard = await this.cardRepository.save(newCard);
-
-        if (createdCard) return { message: 'Card created successfully' };
+    async createCard(cardDto: CardDto): Promise<any> {
+        // Находим колонку по user_id и column_name
+        const column = await this.columnRepository.findOne({ where: { user_id: cardDto.id, column_name: cardDto.column_name } });
     
+        if (!column) {
+            throw new BadRequestException("Column does not exist");
+        }
+    
+        const column_id = column.column_id;
+    
+        const cardExisted = await this.cardRepository.findOne({ 
+            where: { 
+                user_id: cardDto.id, 
+                column_id,  
+                card_name: cardDto.card_name
+            } 
+        });
+    
+        if (cardExisted) {
+            throw new BadRequestException("Card already exists!"); // Ошибка, если карточка существует
+        }
+    
+        // Создание новой карточки
+        const newCard = this.cardRepository.create({ user_id: cardDto.id, column_id, card_name: cardDto.card_name, description: cardDto.description });
+    
+        // Сохранение карточки
+        const createdCard = await this.cardRepository.save(newCard);
+    
+        if (createdCard) {
+            return { message: 'Card created successfully' }; // Успех
+        }
+    
+        // Ошибка при создании
         throw new BadRequestException("Create error");
     }
 
