@@ -22,7 +22,7 @@ export class ColumnService {
 
   async checkColumn(ColumnDto: ColumnDto) {
     const ExistColumn = await this.ExistedColumnData(ColumnDto);
-    if (!ExistColumn) throw new BadRequestException('Column not found');
+    if (!ExistColumn) throw new NotFoundException('Column not found');
   }
 
   async GetColumnData(ColumnDto: ColumnDto): Promise<string> {
@@ -50,9 +50,9 @@ export class ColumnService {
     }));
   }
 
-  async createColumn(ColumnDto: ColumnDto): Promise<any> {
+  async createColumn(ColumnDto: ColumnDto): Promise<any> {wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     if (await this.ExistedColumnData(ColumnDto))
-      throw new BadRequestException('Column arleady existed');
+      throw new NotFoundException('Column arleady existed');
 
     const newColumn = this.columnRepository.create({
       user_id: ColumnDto.id,
