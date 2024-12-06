@@ -6,11 +6,10 @@ export class ParamDtoColumn {
 
   @ApiProperty()
   @IsUUID()
-  id: string;
+  user_id: string;
 
   @ApiProperty()
   @IsOptional()
   column_name: string;
 
 }
-

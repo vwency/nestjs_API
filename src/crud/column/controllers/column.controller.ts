@@ -20,15 +20,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { ParamDtoColumn } from '../dto/param.dto';
 import { BodyDtoColumn } from '../dto/body.dto';
 
-@Controller('user/:id/columns/')
+@Controller('user/:user_id/columns/')
 export class ColumnController {
   constructor(private readonly ColumnService: ColumnService) {}
 
   @ApiTags('Get column')
   @Get(':column_name')
   @UsePipes(new ValidationPipe())
-  async findUserColumns(@Param() colDto: ColumnDto) {
-    return await this.ColumnService.GetColumnData(colDto);
+  async findUserColumns(@Param() params: ParamDtoColumn) {
+    return await this.ColumnService.GetColumnData(params);
   }
 
   @ApiTags('Create column')
@@ -61,4 +61,3 @@ export class ColumnController {
     return await this.ColumnService.updateColumn(params, body);
   }
 }
-

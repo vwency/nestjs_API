@@ -7,6 +7,7 @@ import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { Comments } from 'src/database/schema/comment.entity';
 import { UserDto } from 'src/auth/dto/user.dto';
+import { UserIdDto } from '../dto/user_id.dto';
 
 @Injectable()
 export class UserService {
@@ -25,8 +26,8 @@ export class UserService {
       return await this.userRepository.find();
   }
 
-  async getUser(user_id: uuidv4): Promise<string> {
-    const user = await this.userRepository.findOne({ where: { user_id } });
+  async getUser(userDto: UserIdDto): Promise<string> {
+    const user = await this.userRepository.findOne({ where: { ...userDto } });
     if (!user) throw new NotFoundException("User not found");
     return JSON.stringify(user);
   }
@@ -40,8 +41,7 @@ export class UserService {
       throw new BadRequestException("User already exists");
     }
     
-    const newUser = this.userRepository.create(userDto);
-    return this.userRepository.save(newUser);
+    return this.userRepository.save(this.userRepository.create(userDto));
   }
 
 }

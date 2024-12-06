@@ -7,7 +7,7 @@ import { CardDto } from '../dto/card.dto';
 import { CardService } from '../services/card.service';
 
 
-@Controller('user/:id/columns/:column_name/cards/')
+@Controller('user/:user_id/columns/:column_name/cards/')
 export class CardController {
   constructor(
     private readonly cardService: CardService,

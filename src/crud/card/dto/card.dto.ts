@@ -11,7 +11,7 @@ export class CardDto {
 
   @ApiProperty()
   @IsUUID()
-  id: uuidv4;
+  user_id: uuidv4;
   
   @ApiProperty()
   @IsString()

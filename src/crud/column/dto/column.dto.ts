@@ -7,7 +7,7 @@ export class ColumnDto {
 
   @ApiProperty()
   @IsUUID()
-  id: string;
+  user_id: string;
 
   @ApiProperty()
   @IsString()

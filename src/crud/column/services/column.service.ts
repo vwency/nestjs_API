@@ -20,63 +20,40 @@ export class ColumnService {
     private readonly columnRepository: Repository<Columns>,
   ) {}
 
-  async checkColumn(ColumnDto: ColumnDto) {
-    const ExistColumn = await this.ExistedColumnData(ColumnDto);
-    if (!ExistColumn) throw new NotFoundException('Column not found');
+  async ExistedColumnData(params: ParamDtoColumn): Promise<any> {
+    return await this.columnRepository.findOne({ where: { ...params } });
   }
 
-  async GetColumnData(ColumnDto: ColumnDto): Promise<string> {
-    await this.checkColumn(ColumnDto);
-    const columnEx = await this.columnRepository.findOne({
-      where: { user_id: ColumnDto.id, column_name: ColumnDto.column_name },
-    });
-    return JSON.stringify(columnEx);
+  async GetColumnData(params: ParamDtoColumn): Promise<string> {
+    const column = await this.ExistedColumnData(params);
+    if (!column) throw new NotFoundException('Column not found');
+    return JSON.stringify(column);
   }
 
   async deleteColumn(ColumnDto: ParamDtoColumn): Promise<any> {
-    const deletedColumn = await this.columnRepository.delete({
-      user_id: ColumnDto.id,
-      column_name: ColumnDto.column_name,
-    });
+    const deletedColumn = await this.columnRepository.delete({ ...ColumnDto });
 
-    const deleted = !!deletedColumn.affected;
-    if (deleted) return { message: 'Column deleted successfully' };
+    if (!!deletedColumn.affected)
+      return { message: 'Column deleted successfully' };
     throw new NotFoundException('Column not found');
   }
 
-  async ExistedColumnData(columnDto: ColumnDto): Promise<boolean> {
-    return !!(await this.columnRepository.findOne({
-      where: { user_id: columnDto.id, column_name: columnDto.column_name },
-    }));
-  }
-
-  async createColumn(ColumnDto: ColumnDto): Promise<any> {wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+  async createColumn(ColumnDto: ColumnDto): Promise<any> {
     if (await this.ExistedColumnData(ColumnDto))
-      throw new NotFoundException('Column arleady existed');
+      throw new NotFoundException('Column existed found');
 
     const newColumn = this.columnRepository.create({
-      user_id: ColumnDto.id,
-      column_name: ColumnDto.column_name,
-      description: ColumnDto.description,
+      ...ColumnDto,
     });
 
-    const createdColumn = await this.columnRepository.save(newColumn);
-    if (createdColumn) return { message: 'Column created successfully' };
-    throw new BadRequestException('Create error');
+    return await this.columnRepository.save(newColumn);
   }
 
   async updateColumn(params: ParamDtoColumn, updatePayload: Partial<Columns>) {
-    const columnEx = await this.columnRepository.findOne({
-      where: { user_id: params.id, column_name: params.column_name },
-    });
+    const column = await this.ExistedColumnData(params);
+    if (!column) throw new NotFoundException('Column not found');
+    Object.assign(column, updatePayload);
 
-    if (!columnEx) {
-      throw new NotFoundException('Column not found');
-    }
-
-    Object.assign(columnEx, updatePayload);
-
-    await this.columnRepository.save(columnEx);
-    return true;
+    return await this.columnRepository.save(column);
   }
 }
