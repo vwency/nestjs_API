@@ -10,6 +10,7 @@ import { UserService } from '../user/services/user.service';
 import { CardService } from './services/card.service';
 import { JwtAuthService } from 'src/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { CrudLogic } from '../logic/crud.ts.service';
 
 @Module({
   controllers: [CardController],
@@ -22,6 +23,7 @@ import { JwtService } from '@nestjs/jwt';
     CardService,
     JwtAuthService,
     JwtService,
+    CrudLogic
   ],
 })
 export class CardModule { }

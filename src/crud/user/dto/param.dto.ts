@@ -3,17 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 
 
-export class ColumnDto {
-
+export class ParamDtoUser {
   @ApiProperty()
   @IsUUID()
-  user_id: string;
+  user_id: uuidv4;
 
   @ApiProperty()
-  @IsString()
-  column_name: string;
-
-  @IsString()
-  description: string;
-
+  username: string;
 }

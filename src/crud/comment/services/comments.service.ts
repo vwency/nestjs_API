@@ -1,14 +1,18 @@
-
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ParamData,
+} from '@nestjs/common';
 import { Users } from '../../../database/schema/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { Comments } from 'src/database/schema/comment.entity';
-import { UserDto } from 'src/auth/dto/user.dto';
-import { CommnetDto } from '../dto/comment.dto';
+import { CommentDto } from '../dto/comment.dto';
+import { CrudLogic } from 'src/crud/logic/crud.ts.service';
+import { ParamDtoComment } from '../dto/param.dto';
 
 @Injectable()
 export class CommentsService {
@@ -21,84 +25,75 @@ export class CommentsService {
     private readonly cardRepository: Repository<Cards>,
     @InjectRepository(Comments)
     private readonly commentRepository: Repository<Comments>,
-  ) { }
+  ) {}
 
-  async commentExisted(user_id: uuidv4, column_name: string, card_name: string, comment_name: string): Promise<boolean> {
-    if (!this.cardRepository) throw new Error('cardRepository is not defined or is undefined');
+  async getComment(params: ParamDtoComment): Promise<string> {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-    const column = await this.columnRepository.findOne({ where: { user_id, column_name } });
-    const column_id = column?.column_id;
-
-    const card = await this.cardRepository.findOne({ where: { user_id, column_id, card_name } });
-    const card_id = card?.card_id;
-
-    const comments = await this.commentRepository.findOne({ where: { user_id, column_id, card_id, comment_name } });
-    return !!comments;
+    return JSON.stringify(comment);
   }
 
+  async createComment(comDto: CommentDto): Promise<any> {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      comDto,
+      false,
+    );
 
-  async getComment(comDto: CommnetDto): Promise<string> {
+    const Card = this.commentRepository.create({
+      ...comDto,
+    });
 
-    if (!this.cardRepository) throw new Error('cardRepository is not defined or is undefined');
-
-    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) throw new NotFoundException("comment not found");
-
-    const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
-    const column_id = column?.column_id;
-
-    const card = await this.cardRepository.findOne({ where: { user_id: comDto.id, column_id, card_name: comDto.card_name } });
-    const card_id = card?.card_id;
-
-    const comments = await this.commentRepository.findOne({ where: { user_id: comDto.id, column_id, card_id, comment_name: comDto.comment_name } });
-    return JSON.stringify(comments);
+    return await this.commentRepository.save(Card);
+    throw new BadRequestException('Create error');
   }
 
-  async createComment(user_id: uuidv4, column_name: string, card_name: string, comment_name: string): Promise<any> {
+  async deleteComment(params: ParamDtoComment): Promise<any> {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-    const column = await this.columnRepository.findOne({ where: { user_id, column_name } });
-    const column_id = column?.column_id;
-
-    const card = await this.cardRepository.findOne({ where: { user_id, column_id, card_name } });
-    const card_id = card?.card_id;
-    if (!column_id) return false;
-    const newComment = this.commentRepository.create({ user_id, card_id, column_id, comment_name });
-
-    if (await this.commentRepository.save(newComment)) return { message: 'Comment created successfully' };
-      
-    throw new BadRequestException("Failed create comment!");
-  
+    const CommentDelete = await this.commentRepository.delete({
+      ...comment,
+    });
   }
 
-  async deleteCommentq(comDto: CommnetDto): Promise<any> {
-
-    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) {
-      throw new NotFoundException("comment not found");
-    }
-
-    const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
-    const column_id = column?.column_id;
-    const card = await this.cardRepository.findOne({ where: { user_id: comDto.id, column_id, card_name: comDto.card_name } });
-    const card_id = card?.card_id;
-    const deleted = await this.commentRepository.delete({ user_id: comDto.id, column_id, card_id, comment_name: comDto.comment_name });
-    if (deleted) return { message: 'Comment deleted successfully' };
-    throw new BadRequestException("Delete error");
-  }
-
-  async updateComment(comDto: CommnetDto, new_name: string): Promise<any> {
-
-    if (!await this.commentExisted(comDto.id, comDto.column_name, comDto.card_name, comDto.comment_name)) {
-      throw new NotFoundException("comment not found");
-    }
+  async updateComment(params: ParamDtoComment, updatePayload: Partial<Comments>) {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
     
-    const column = await this.columnRepository.findOne({ where: { user_id: comDto.id, column_name: comDto.column_name } });
-    const column_id = column?.column_id;
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-    const card = await this.cardRepository.findOne({ where: { user_id: comDto.id, column_id, card_name: comDto.card_name } });
-    const card_id = card?.card_id;
-
-    const comments = await this.commentRepository.findOne({ where: { user_id: comDto.id, column_id, card_id, comment_name: comDto.comment_name } });
-    comments.comment_name = new_name;
-    await this.commentRepository.save(comments);
-    return true;
+    Object.assign(comment, updatePayload);
+    return await this.commentRepository.save(comment);
   }
+
 }
