@@ -20,12 +20,12 @@ export class ColumnService {
     private readonly columnRepository: Repository<Columns>,
   ) {}
 
-  async ExistedColumnData(params: ParamDtoColumn): Promise<any> {
+  async FindColumn(params: ParamDtoColumn): Promise<any> {
     return await this.columnRepository.findOne({ where: { ...params } });
   }
 
   async GetColumnData(params: ParamDtoColumn): Promise<string> {
-    const column = await this.ExistedColumnData(params);
+    const column = await this.FindColumn(params);
     if (!column) throw new NotFoundException('Column not found');
     return JSON.stringify(column);
   }
@@ -39,7 +39,7 @@ export class ColumnService {
   }
 
   async createColumn(ColumnDto: ColumnDto): Promise<any> {
-    if (await this.ExistedColumnData(ColumnDto))
+    if (await this.FindColumn(ColumnDto))
       throw new NotFoundException('Column existed found');
 
     const newColumn = this.columnRepository.create({
@@ -50,7 +50,7 @@ export class ColumnService {
   }
 
   async updateColumn(params: ParamDtoColumn, updatePayload: Partial<Columns>) {
-    const column = await this.ExistedColumnData(params);
+    const column = await this.FindColumn(params);
     if (!column) throw new NotFoundException('Column not found');
     Object.assign(column, updatePayload);
 

@@ -5,6 +5,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { ColumnDto } from '../../column/dto/column.dto';
 import { CardDto } from '../dto/card.dto';
 import { CardService } from '../services/card.service';
+import { ParamDtoCard } from '../dto/param.dto';
+import { BodyCardDto } from '../dto/body.dto';
+import { BodyDtoColumn } from 'src/crud/column/dto/body.dto';
 
 
 @Controller('user/:user_id/columns/:column_name/cards/')
@@ -13,30 +16,36 @@ export class CardController {
     private readonly cardService: CardService,
   ) { }
 
-  @ApiTags('Create card')
-  @Post('add')
-  async createCard(@Param() params: CardDto, @Body() body: CardDto) {
-    const payload = { ...params, ...body };
-    return await this.cardService.createCard(payload);
-  }
-
-
   @ApiTags('Get card')
   @Get(':card_name')
-  async getCards(@Param() cardDto: CardDto) {
-    return await this.cardService.getCard(cardDto);
+  async getCards(@Param() params: ParamDtoCard) {
+    return await this.cardService.getCard(params);
   }
 
+  // @ApiTags('Create card')
+  // @Post('add')
+  // @UsePipes(new ValidationPipe())
+  // async createCard(@Param() params: ParamCardDto, @Body() body: BodyCardDto) {
+  //   const payload = { ...params, ...body };
+  //   return await this.cardService.createCard(payload);
+  // }
 
-  @ApiTags('Delete card')
-  @Delete(':card_name')
-  async deleteCard(@Param() cardDto: CardDto) {
-    return await this.cardService.deleteCard(cardDto);
-  }
 
-  @ApiTags('Update card')
-  @Put(':card_name')
-  async updateCards(@Param() cardDto: CardDto, @Body('new_name') new_name: string) {
-    return await this.cardService.updateCard(cardDto, new_name);
-  }
+  // @ApiTags('Delete card')
+  // @Delete(':card_name')
+  // async deleteCard(@Param() cardDto: CardDto) {
+  //   return await this.cardService.deleteCard(cardDto);
+  // }
+
+  // @ApiTags('Update card')
+  // @Put(':column_name')
+  // async updateColumn(
+  //   @Param() params: ParamCardDto,
+  //   @Body() body: BodyDtoColumn,
+  // ) {
+
+  //   return await this.cardService.updateCard(params, body);
+  // }
 }
+
+

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,7 +12,11 @@ import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { CardDto } from '../dto/card.dto';
 import { ColumnDto } from 'src/crud/column/dto/column.dto';
-
+import { ParamDtoColumn } from 'src/crud/column/dto/param.dto';
+import { ReflectableDecorator } from '@nestjs/core';
+import { plainToClass } from 'class-transformer';
+import { ParamDtoCard } from '../dto/param.dto';
+import { ParamBDtoCard } from '../dto/cardBDto';
 @Injectable()
 export class CardService {
   constructor(
@@ -23,104 +28,91 @@ export class CardService {
     private readonly cardRepository: Repository<Cards>,
   ) {}
 
-  async createCard(cardDto: CardDto): Promise<any> {
-    const column = await this.columnRepository.findOne({
-      where: { user_id: cardDto.user_id, column_name: cardDto.column_name },
-    });
-
-    if (!column) {
-      throw new BadRequestException('Column does not exist');
-    }
-
-    const column_id = column.column_id;
-
-    const cardExisted = await this.cardRepository.findOne({
-      where: {
-        user_id: cardDto.user_id,
-        column_id,
-        card_name: cardDto.card_name,
-      },
-    });
-
-    if (cardExisted) {
-      throw new BadRequestException('Card already exists!'); // Ошибка, если карточка существует
-    }
-
-    // Создание новой карточки
-    const newCard = this.cardRepository.create({
-      user_id: cardDto.user_id,
-      column_id,
-      card_name: cardDto.card_name,
-      description: cardDto.description,
-    });
-
-    // Сохранение карточки
-    const createdCard = await this.cardRepository.save(newCard);
-
-    if (createdCard) {
-      return { message: 'Card created successfully' }; // Успех
-    }
-
-    // Ошибка при создании
-    throw new BadRequestException('Create error');
+  
+  private async filterParams<T>(dto: new () => T, params: Record<string, any>): Promise<Partial<T>> {
+    const instance = plainToClass(dto, {});
+    const prototype = Object.keys(instance);
+    const filteredParams = Object.keys(params)
+      .filter(key => prototype.includes(key))
+      .reduce((acc, key) => {
+        acc[key] = params[key];
+        return acc;
+      }, {} as Partial<T>);
+  
+    return filteredParams;
   }
 
-  async getCard(cardDto: CardDto): Promise<string> {
-    const cardExisted = await this.cardRepository.findOne({
-      where: {
-        user_id: cardDto.user_id,
-        column_id: cardDto.column_name,
-        card_name: cardDto.card_name,
-      },
-    });
-    if (!cardExisted) throw new BadRequestException('Card not founded');
+  async findCard(params: ParamBDtoCard) {
+    
+    const filteredParams = await this.filterParams(ParamBDtoCard, params);
+    console.log(filteredParams);
+    return await this.cardRepository.findOne({ where: { ...filteredParams } });
+  }
+  
+  async findColumn(params: ParamDtoColumn) {
 
-    const column = await this.columnRepository.findOne({
-      where: { user_id: cardDto.user_id, column_name: cardDto.column_name },
-    });
-    const column_id = column?.column_id;
-    const card = await this.cardRepository.findOne({
-      where: { user_id: cardDto.user_id, column_id, card_name: cardDto.card_name },
-    });
+    const filteredParams = await this.filterParams(ParamDtoColumn, params);
+    console.log(filteredParams);
+    return await this.columnRepository.findOne({ where: { ...filteredParams } });
+  }
+
+  async getCard(cardDto: ParamDtoCard): Promise<any> {
+    const column = await this.findColumn(cardDto);
+    if (!column) throw new NotFoundException('Column not founded');
+    cardDto.column_id = column?.column_id;
+
+    const card = await this.findCard(cardDto);
+    if (!card) throw new NotFoundException('Card not founded');
+
     return JSON.stringify(card);
   }
 
-  async deleteCard(cardDto: CardDto): Promise<any> {
-    const column = await this.columnRepository.findOne({
-      where: { user_id: cardDto.user_id, column_name: cardDto.column_name },
-    });
-    const column_id = column?.column_id;
-    const cardExisted = await this.cardRepository.findOne({
-      where: {
-        user_id: cardDto.user_id,
-        column_id: cardDto.column_name,
-        card_name: cardDto.card_name,
-      },
-    });
+//   async createCard(cardDto: CardDto): Promise<any> {
+//     const column = await this.findColumn(cardDto);
 
-    if (!cardExisted) throw new NotFoundException('card not founded');
+//     cardDto.column_id = column?.column_id;
+//     const card = this.findCard(cardDto);
 
-    const deletedColumn = await this.cardRepository.delete({
-      user_id: cardDto.user_id,
-      column_id,
-      card_name: cardDto.card_name,
-    });
-    if (!!deletedColumn.affected)
-      return { message: 'Card deleted successfully' };
+//     if (!column) throw new NotFoundException('Column not found!');
 
-    throw new BadRequestException('Card was not deleted');
-  }
+//     if (await this.findCard(cardDto))
+//       throw new ConflictException('Column existed');
 
-  async updateCard(cardDto: CardDto, new_name: string) {
-    const column = await this.columnRepository.findOne({
-      where: { user_id: cardDto.user_id, column_name: cardDto.column_name },
-    });
-    const column_id = column?.column_id;
-    const card = await this.cardRepository.findOne({
-      where: { user_id: cardDto.user_id, column_id, card_name: cardDto.card_name },
-    });
-    card.card_name = new_name;
-    await this.cardRepository.save(card);
-    return 'Card updated';
-  }
+//     const Card = this.cardRepository.create({
+//       ...cardDto
+//     });
+
+//     return await this.cardRepository.save(Card);
+//     throw new BadRequestException('Create error');
+//   }
+
+//   async deleteCard(cardDto: CardDto): Promise<any> {
+//     const column = await this.findColumn(cardDto);
+//     const column_id = column?.column_id;
+//     cardDto.column_id = column?.column_id;
+//     const card = this.findCard(cardDto);
+
+//     if (!card) throw new NotFoundException('card not founded');
+
+//     const CardDelete = await this.cardRepository.delete({
+//       ...cardDto,
+//     });
+//     if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
+
+//     throw new BadRequestException('Card was not deleted');
+//   }
+
+//   async updateCard(params: ParamCardDto, updatePayload: Partial<Cards>) {
+
+//     const column = await this.findColumn(params);
+//     if (!column) throw new NotFoundException('Column not found');
+//     const column_id = column?.column_id;
+//     params.column_id = column?.column_id;
+//     const card = this.findCard(params);
+//     if (!card) throw new NotFoundException('Card not found');
+    
+//     Object.assign(card, updatePayload);
+//     return await this.columnRepository.save(column);
+
+//   }
 }
