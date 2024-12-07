@@ -2,16 +2,17 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ParamData,
 } from '@nestjs/common';
 import { Users } from '../../../database/schema/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { Comments } from 'src/database/schema/comment.entity';
-import { UserDto } from 'src/auth/dto/user.dto';
 import { CommentDto } from '../dto/comment.dto';
+import { CrudLogic } from 'src/crud/logic/crud.ts.service';
+import { ParamDtoComment } from '../dto/param.dto';
 
 @Injectable()
 export class CommentsService {
@@ -26,114 +27,73 @@ export class CommentsService {
     private readonly commentRepository: Repository<Comments>,
   ) {}
 
-  async getColumnAndCardId(
-    comDto: CommentDto,
-  ): Promise<{ column_id: string; card_id: string }> {
-    const column = await this.columnRepository.findOne({
-      where: {
-        user_id: comDto.id,
-        column_name: comDto.column_name,
-      },
-    });
 
-    const card = await this.cardRepository.findOne({
-      where: {
-        user_id: comDto.id,
-        column_id: column.column_id,
-        card_name: comDto.card_name,
-      },
-    });
 
-    return { column_id: column.column_id, card_id: card.card_id };
+  async getComment(params: ParamDtoComment): Promise<string> {
+
+    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const { column, card, comment } = await crudLogic.findColumnCardComment(params, true);
+
+
+    return JSON.stringify(comment);
   }
 
-  async commentExisted(comDto: CommentDto): Promise<boolean> {
-    const { column_id, card_id } = await this.getColumnAndCardId(comDto);
+  // async createComment(comDto: CommentDto): Promise<any> {
 
-    const comments = await this.commentRepository.findOne({
-      where: {
-        user_id: comDto.id,
-        column_id,
-        card_id,
-        comment_name: comDto.comment_name,
-      },
-    });
-    return !!comments;
-  }
+  //   if ((await this.commentExisted(comDto)))
+  //     throw new NotFoundException('Arleady existed');
 
-  async getComment(comDto: CommentDto): Promise<string> {
-    if (!(await this.commentExisted(comDto)))
-      throw new NotFoundException('comment not found');
+  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
 
-    const { column_id, card_id } = await this.getColumnAndCardId(comDto);
+  //   const newComment = this.commentRepository.create({
+  //     user_id: comDto.id,
+  //     card_id,
+  //     column_id,
+  //     comment_name: comDto.comment_name,
+  //     description: comDto.description
+  //   });
 
-    const comments = await this.commentRepository.findOne({
-      where: {
-        user_id: comDto.id,
-        column_id,
-        card_id,
-        comment_name: comDto.comment_name,
-      },
-    });
-    return JSON.stringify(comments);
-  }
+  //   if (await this.commentRepository.save(newComment))
+  //     return { message: 'Comment created successfully' };
 
-  async createComment(comDto: CommentDto): Promise<any> {
+  //   throw new BadRequestException('Failed create comment!');
+  // }
 
-    if ((await this.commentExisted(comDto)))
-      throw new NotFoundException('Arleady existed');
+  // async deleteComment(comDto: CommentDto): Promise<any> {
 
-    const { column_id, card_id } = await this.getColumnAndCardId(comDto);
+  //   if (!(await this.commentExisted(comDto)))
+  //     throw new NotFoundException('comment not found');
 
-    const newComment = this.commentRepository.create({
-      user_id: comDto.id,
-      card_id,
-      column_id,
-      comment_name: comDto.comment_name,
-      description: comDto.description
-    });
+  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
 
-    if (await this.commentRepository.save(newComment))
-      return { message: 'Comment created successfully' };
+  //   const deleted = await this.commentRepository.delete({
+  //     id: comDto.id,
+  //     column_id,
+  //     card_id,
+  //     comment_name: comDto.comment_name,
+  //   });
+  //   if (deleted) return { message: 'Comment deleted successfully' };
+  //   throw new BadRequestException('Delete error');
+  // }
 
-    throw new BadRequestException('Failed create comment!');
-  }
+  // async updateComment(comDto: CommentDto): Promise<any> {
 
-  async deleteComment(comDto: CommentDto): Promise<any> {
+  //   if (!(await this.commentExisted(comDto)))
+  //     throw new NotFoundException('comment not found');
 
-    if (!(await this.commentExisted(comDto)))
-      throw new NotFoundException('comment not found');
+  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
 
-    const { column_id, card_id } = await this.getColumnAndCardId(comDto);
+  //   const comments = await this.commentRepository.findOne({
+  //     where: {
+  //       user_id: comDto.id,
+  //       column_id,
+  //       card_id,
+  //       comment_name: comDto.comment_name,
+  //     },
+  //   });
 
-    const deleted = await this.commentRepository.delete({
-      id: comDto.id,
-      column_id,
-      card_id,
-      comment_name: comDto.comment_name,
-    });
-    if (deleted) return { message: 'Comment deleted successfully' };
-    throw new BadRequestException('Delete error');
-  }
-
-  async updateComment(comDto: CommentDto): Promise<any> {
-
-    if (!(await this.commentExisted(comDto)))
-      throw new NotFoundException('comment not found');
-
-    const { column_id, card_id } = await this.getColumnAndCardId(comDto);
-
-    const comments = await this.commentRepository.findOne({
-      where: {
-        user_id: comDto.id,
-        column_id,
-        card_id,
-        comment_name: comDto.comment_name,
-      },
-    });
-
-    comments.comment_name = comDto.new_name;
-    await this.commentRepository.save(comments);
-    return true;
-  }
+  //   comments.comment_name = comDto.new_name;
+  //   await this.commentRepository.save(comments);
+  //   return true;
+  // }
 }

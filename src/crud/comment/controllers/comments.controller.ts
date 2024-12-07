@@ -16,37 +16,38 @@ import { UsePipes } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CommentDto } from '../dto/comment.dto';
 import { CommentsService } from '../services/comments.service';
+import { ParamDtoComment } from '../dto/param.dto';
 
 @Controller('user/:id/columns/:column_name/cards/:card_name/comments/')
 export class CommentsController {
   constructor(private readonly commentService: CommentsService) {}
 
-  @Post('add')
-  async addComment(@Param() params: CommentDto, @Body() body: CommentDto) {
-    const comDto = { ...params, ...body };
-    return await this.commentService.createComment(comDto);
-  }
 
   @ApiTags('Get comment')
   @Get(':comment_name')
-  async getComment(@Param() comDto: CommentDto) {
-    return await this.commentService.getComment(comDto);
+  async getComment(@Param() params: ParamDtoComment) {
+    return await this.commentService.getComment(params);
   }
 
-  @ApiTags('Delete comment')
-  @Delete(':comment_name')
-  async deleteComment(@Param() comDto: CommentDto) {
-    return await this.commentService.deleteComment(comDto);
-  }
+  // @Post('add')
+  // async addComment(@Param() params: CommentDto, @Body() body: CommentDto) {
+  //   const comDto = { ...params, ...body };
+  //   return await this.commentService.createComment(comDto);
+  // }
+  // @ApiTags('Delete comment')
+  // @Delete(':comment_name')
+  // async deleteComment(@Param() comDto: CommentDto) {
+  //   return await this.commentService.deleteComment(comDto);
+  // }
 
-  @Put(':comment_name')
-  async updateComments(
-    @Param() params: CommentDto,
-    @Body() body: CommentDto, 
-  ) {
-    const comDto = { ...params, ...body };
-    return await this.commentService.updateComment(comDto);
-  }
+  // @Put(':comment_name')
+  // async updateComments(
+  //   @Param() params: CommentDto,
+  //   @Body() body: CommentDto, 
+  // ) {
+  //   const comDto = { ...params, ...body };
+  //   return await this.commentService.updateComment(comDto);
+  // }
   
 }
 
