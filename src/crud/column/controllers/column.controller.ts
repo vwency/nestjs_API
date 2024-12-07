@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ParamDtoColumn } from '../dto/param.dto';
 import { BodyDtoColumn } from '../dto/body.dto';
 
-@Controller('user/:user_id/columns/')
+@Controller('user/:username/columns/')
 export class ColumnController {
   constructor(private readonly ColumnService: ColumnService) {}
 

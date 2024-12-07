@@ -7,6 +7,10 @@ import { Expose } from 'class-transformer';
 export class ParamDtoComment {
 
   @ApiProperty()
+  @IsUUID()
+  user_id: uuidv4;
+
+  @ApiProperty()
   @IsString()
   column_name: string;
 
@@ -18,10 +22,6 @@ export class ParamDtoComment {
   @IsUUID()
   comment_name: string;
 
-  @ApiProperty()
-  @IsUUID()
-  user_id: uuidv4;
-  
   @ApiProperty()
   @IsOptional()
   @IsUUID()

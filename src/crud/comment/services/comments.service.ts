@@ -27,73 +27,73 @@ export class CommentsService {
     private readonly commentRepository: Repository<Comments>,
   ) {}
 
-
-
   async getComment(params: ParamDtoComment): Promise<string> {
-
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card, comment } = await crudLogic.findColumnCardComment(params, true);
-
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
     return JSON.stringify(comment);
   }
 
-  // async createComment(comDto: CommentDto): Promise<any> {
+  async createComment(comDto: CommentDto): Promise<any> {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      comDto,
+      false,
+    );
 
-  //   if ((await this.commentExisted(comDto)))
-  //     throw new NotFoundException('Arleady existed');
+    const Card = this.commentRepository.create({
+      ...comDto,
+    });
 
-  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
+    return await this.commentRepository.save(Card);
+    throw new BadRequestException('Create error');
+  }
 
-  //   const newComment = this.commentRepository.create({
-  //     user_id: comDto.id,
-  //     card_id,
-  //     column_id,
-  //     comment_name: comDto.comment_name,
-  //     description: comDto.description
-  //   });
+  async deleteComment(params: ParamDtoComment): Promise<any> {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-  //   if (await this.commentRepository.save(newComment))
-  //     return { message: 'Comment created successfully' };
+    const CommentDelete = await this.commentRepository.delete({
+      ...comment,
+    });
+  }
 
-  //   throw new BadRequestException('Failed create comment!');
-  // }
+  async updateComment(params: ParamDtoComment, updatePayload: Partial<Comments>) {
+    const crudLogic = new CrudLogic(
+      this.userRepository,
+      this.columnRepository,
+      this.cardRepository,
+      this.commentRepository,
+    );
+    
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-  // async deleteComment(comDto: CommentDto): Promise<any> {
+    Object.assign(comment, updatePayload);
+    return await this.commentRepository.save(comment);
+  }
 
-  //   if (!(await this.commentExisted(comDto)))
-  //     throw new NotFoundException('comment not found');
-
-  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
-
-  //   const deleted = await this.commentRepository.delete({
-  //     id: comDto.id,
-  //     column_id,
-  //     card_id,
-  //     comment_name: comDto.comment_name,
-  //   });
-  //   if (deleted) return { message: 'Comment deleted successfully' };
-  //   throw new BadRequestException('Delete error');
-  // }
-
-  // async updateComment(comDto: CommentDto): Promise<any> {
-
-  //   if (!(await this.commentExisted(comDto)))
-  //     throw new NotFoundException('comment not found');
-
-  //   const { column_id, card_id } = await this.getColumnAndCardId(comDto);
-
-  //   const comments = await this.commentRepository.findOne({
-  //     where: {
-  //       user_id: comDto.id,
-  //       column_id,
-  //       card_id,
-  //       comment_name: comDto.comment_name,
-  //     },
-  //   });
-
-  //   comments.comment_name = comDto.new_name;
-  //   await this.commentRepository.save(comments);
-  //   return true;
-  // }
 }

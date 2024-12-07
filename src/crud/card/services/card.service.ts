@@ -44,7 +44,7 @@ export class CardService {
 
   async getCard(cardDto: ParamDtoCard): Promise<any> {
     const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCard(cardDto, true);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
 
     return JSON.stringify(card);
   }
@@ -52,7 +52,7 @@ export class CardService {
   async createCard(cardDto: CardDto): Promise<any> {
 
     const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCard(cardDto, false);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, false);
 
     const Card = this.cardRepository.create({
       ...cardDto,
@@ -65,7 +65,7 @@ export class CardService {
   async deleteCard(cardDto: CardDto): Promise<any> {
     
     const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCard(cardDto, true);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
 
     const CardDelete = await this.cardRepository.delete({
       ...card,
@@ -78,7 +78,7 @@ export class CardService {
   async updateCard(params: ParamDtoCard, updatePayload: Partial<Cards>) {
 
     const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCard(params, true);
+    const { column, card } = await crudLogic.findColumnCardComment(params, true);
 
     Object.assign(card, updatePayload);
     return await this.cardRepository.save(card);

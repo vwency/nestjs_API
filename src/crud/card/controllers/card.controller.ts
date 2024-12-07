@@ -10,7 +10,7 @@ import { BodyCardDto } from '../dto/body.dto';
 import { BodyDtoColumn } from 'src/crud/column/dto/body.dto';
 
 
-@Controller('user/:user_id/columns/:column_name/cards/')
+@Controller('user/:username/columns/:column_name/cards/')
 export class CardController {
   constructor(
     private readonly cardService: CardService,
@@ -24,7 +24,6 @@ export class CardController {
 
   @ApiTags('Create card')
   @Post('add')
-
   async createCard(@Param() params: ParamDtoCard, @Body() body: BodyCardDto) {
     const payload = { ...params, ...body };
     return await this.cardService.createCard(payload);

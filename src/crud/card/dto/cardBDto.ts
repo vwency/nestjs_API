@@ -8,14 +8,13 @@ export class ParamBDtoCard {
 
   @Expose()
   @ApiProperty()
-  @IsString()
-  card_name: string;
+  @IsUUID()
+  user_id: uuidv4;
 
   @Expose()
   @ApiProperty()
-  @IsUUID()
-  user_id: uuidv4;
-  
+  @IsString()
+  card_name: string;
 
   @Expose()
   @ApiProperty()

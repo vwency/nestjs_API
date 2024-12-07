@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,16 +14,28 @@ import { plainToClass } from 'class-transformer';
 import { Users } from 'src/database/schema/user.entity';
 import { ParamBDtoCard } from '../card/dto/cardBDto';
 import { ParamBDtoComment } from '../comment/dto/commentB.dto';
+import { Comments } from 'src/database/schema/comment.entity';
+import { ParamDtoComment } from '../comment/dto/param.dto';
+import { ParamDtoUser } from '../user/dto/param.dto';
 
 @Injectable()
 export class CrudLogic {
   constructor(
     @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
+    @Optional()
+    private readonly userRepository?: Repository<Users>,
+
     @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
+    @Optional()
+    private readonly columnRepository?: Repository<Columns>,
+
     @InjectRepository(Cards)
-    private readonly cardRepository: Repository<Cards>,
+    @Optional()
+    private readonly cardRepository?: Repository<Cards>,
+
+    @InjectRepository(Comments)
+    @Optional()
+    private readonly commentRepository?: Repository<Comments>,
   ) {}
 
   private async filterParams<T>(
@@ -45,6 +58,14 @@ export class CrudLogic {
     dto: any,
     found: boolean,
   ): Promise<{ column: any; card: any }> {
+
+    const user = await this.findUser(dto);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    dto['user_id'] = user?.user_id;
+
     const column = await this.findColumn(dto);
     if (found && !column) {
       throw new NotFoundException('Column not found');
@@ -68,10 +89,20 @@ export class CrudLogic {
     dto: any,
     found: boolean,
   ): Promise<{ column: any; card: any; comment: any }> {
+
+    const user = await this.findUser(dto);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    dto['user_id'] = user?.user_id;
+
     const column = await this.findColumn(dto);
+
     if (found && !column) {
       throw new NotFoundException('Column not found');
     }
+
     dto['column_id'] = column?.column_id;
 
     const card = await this.findCard(dto);
@@ -80,18 +111,26 @@ export class CrudLogic {
       throw new NotFoundException('Card not found');
     }
 
-    if (!found && card) {
-      throw new ConflictException('Card already exists');
-    }
+    dto['card_id'] = card?.card_id;
 
     const comment = await this.findComment(dto);
+
+    if (found && !comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (!found && comment) {
+      throw new ConflictException('Comment already exists');
+    }
 
     return { column, card, comment };
   }
 
   async findComment(params: ParamBDtoComment) {
     const filteredParams = await this.filterParams(ParamBDtoComment, params);
-    return await this.cardRepository.findOne({ where: { ...filteredParams } });
+    return await this.commentRepository.findOne({
+      where: { ...filteredParams },
+    });
   }
 
   async findCard(params: ParamBDtoCard) {
@@ -105,4 +144,12 @@ export class CrudLogic {
       where: { ...filteredParams },
     });
   }
+
+  async findUser(params: ParamDtoUser) {
+    const filteredParams = await this.filterParams(ParamDtoUser, params);
+    return await this.userRepository.findOne({
+      where: { ...filteredParams },
+    });
+  }
+  
 }
