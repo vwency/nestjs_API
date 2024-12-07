@@ -22,30 +22,28 @@ export class CardController {
     return await this.cardService.getCard(params);
   }
 
-  // @ApiTags('Create card')
-  // @Post('add')
-  // @UsePipes(new ValidationPipe())
-  // async createCard(@Param() params: ParamCardDto, @Body() body: BodyCardDto) {
-  //   const payload = { ...params, ...body };
-  //   return await this.cardService.createCard(payload);
-  // }
+  @ApiTags('Create card')
+  @Post('add')
+
+  async createCard(@Param() params: ParamDtoCard, @Body() body: BodyCardDto) {
+    const payload = { ...params, ...body };
+    return await this.cardService.createCard(payload);
+  }
 
 
-  // @ApiTags('Delete card')
-  // @Delete(':card_name')
-  // async deleteCard(@Param() cardDto: CardDto) {
-  //   return await this.cardService.deleteCard(cardDto);
-  // }
+  @ApiTags('Delete card')
+  @Delete(':card_name')
+  async deleteCard(@Param() cardDto: CardDto) {
+    return await this.cardService.deleteCard(cardDto);
+  }
 
-  // @ApiTags('Update card')
-  // @Put(':column_name')
-  // async updateColumn(
-  //   @Param() params: ParamCardDto,
-  //   @Body() body: BodyDtoColumn,
-  // ) {
+  @ApiTags('Update card')
+  @Put(':card_name')
+  async updateColumn(
+    @Param() params: ParamDtoCard,
+    @Body() body: BodyCardDto,
+  ) {
 
-  //   return await this.cardService.updateCard(params, body);
-  // }
+    return await this.cardService.updateCard(params, body);
+  }
 }
-
-

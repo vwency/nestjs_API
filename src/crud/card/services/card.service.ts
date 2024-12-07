@@ -28,91 +28,90 @@ export class CardService {
     private readonly cardRepository: Repository<Cards>,
   ) {}
 
-  
-  private async filterParams<T>(dto: new () => T, params: Record<string, any>): Promise<Partial<T>> {
+  private async filterParams<T>(
+    dto: new () => T,
+    params: Record<string, any>,
+  ): Promise<Partial<T>> {
     const instance = plainToClass(dto, {});
     const prototype = Object.keys(instance);
     const filteredParams = Object.keys(params)
-      .filter(key => prototype.includes(key))
+      .filter((key) => prototype.includes(key))
       .reduce((acc, key) => {
         acc[key] = params[key];
         return acc;
       }, {} as Partial<T>);
-  
+
     return filteredParams;
   }
 
+  private async findColumnAndCard(
+    dto: any,
+    found: boolean,
+  ): Promise<{ column: any; card: any }> {
+    const column = await this.findColumn(dto);
+    if (found && !column) {
+      throw new NotFoundException('Column not found');
+    }
+    dto['column_id'] = column?.column_id;
+
+    const card = await this.findCard(dto);
+
+    if (found && !card) {
+      throw new NotFoundException('Card not found');
+    }
+
+    if (!found && card) {
+      throw new ConflictException('Card already exists');
+    }
+
+    return { column, card };
+  }
+
   async findCard(params: ParamBDtoCard) {
-    
     const filteredParams = await this.filterParams(ParamBDtoCard, params);
-    console.log(filteredParams);
     return await this.cardRepository.findOne({ where: { ...filteredParams } });
   }
-  
-  async findColumn(params: ParamDtoColumn) {
 
+  async findColumn(params: ParamDtoColumn) {
     const filteredParams = await this.filterParams(ParamDtoColumn, params);
-    console.log(filteredParams);
-    return await this.columnRepository.findOne({ where: { ...filteredParams } });
+    return await this.columnRepository.findOne({
+      where: { ...filteredParams },
+    });
   }
 
   async getCard(cardDto: ParamDtoCard): Promise<any> {
-    const column = await this.findColumn(cardDto);
-    if (!column) throw new NotFoundException('Column not founded');
-    cardDto.column_id = column?.column_id;
-
-    const card = await this.findCard(cardDto);
-    if (!card) throw new NotFoundException('Card not founded');
+    const { column, card } = await this.findColumnAndCard(cardDto, true);
 
     return JSON.stringify(card);
   }
 
-//   async createCard(cardDto: CardDto): Promise<any> {
-//     const column = await this.findColumn(cardDto);
+  async createCard(cardDto: CardDto): Promise<any> {
+    const { column, card } = await this.findColumnAndCard(cardDto, false);
 
-//     cardDto.column_id = column?.column_id;
-//     const card = this.findCard(cardDto);
+    const Card = this.cardRepository.create({
+      ...cardDto,
+    });
 
-//     if (!column) throw new NotFoundException('Column not found!');
+    return await this.cardRepository.save(Card);
+    throw new BadRequestException('Create error');
+  }
 
-//     if (await this.findCard(cardDto))
-//       throw new ConflictException('Column existed');
+  async deleteCard(cardDto: CardDto): Promise<any> {
+    const { column, card } = await this.findColumnAndCard(cardDto, true);
 
-//     const Card = this.cardRepository.create({
-//       ...cardDto
-//     });
+    const CardDelete = await this.cardRepository.delete({
+      ...card,
+    });
+    if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
 
-//     return await this.cardRepository.save(Card);
-//     throw new BadRequestException('Create error');
-//   }
+    throw new BadRequestException('Card was not deleted');
+  }
 
-//   async deleteCard(cardDto: CardDto): Promise<any> {
-//     const column = await this.findColumn(cardDto);
-//     const column_id = column?.column_id;
-//     cardDto.column_id = column?.column_id;
-//     const card = this.findCard(cardDto);
+  async updateCard(params: ParamDtoCard, updatePayload: Partial<Cards>) {
 
-//     if (!card) throw new NotFoundException('card not founded');
-
-//     const CardDelete = await this.cardRepository.delete({
-//       ...cardDto,
-//     });
-//     if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
-
-//     throw new BadRequestException('Card was not deleted');
-//   }
-
-//   async updateCard(params: ParamCardDto, updatePayload: Partial<Cards>) {
-
-//     const column = await this.findColumn(params);
-//     if (!column) throw new NotFoundException('Column not found');
-//     const column_id = column?.column_id;
-//     params.column_id = column?.column_id;
-//     const card = this.findCard(params);
-//     if (!card) throw new NotFoundException('Card not found');
+    const { column, card } = await this.findColumnAndCard(params, true);
+    Object.assign(card, updatePayload);
+    return await this.cardRepository.save(card);
     
-//     Object.assign(card, updatePayload);
-//     return await this.columnRepository.save(column);
-
-//   }
+  }
 }
