@@ -11,5 +11,9 @@ export class Users {
   username: string;
 
   @Column("varchar")
-  password: string;
+  hash: string;
+
+  @Column("varchar")
+  hashedRt: string;
+
 }
