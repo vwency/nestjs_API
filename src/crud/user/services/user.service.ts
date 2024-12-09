@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { Comments } from 'src/database/schema/comment.entity';
-import { UserDto } from 'src/auth/dto/user.dto';
+import { UserDto } from 'src/crud/user/dto/user.dto';
 import { UserIdDto } from '../dto/user_id.dto';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class UserService {
       return await this.userRepository.find();
   }
 
-  async getUser(userDto: UserIdDto): Promise<string> {
+  async getUser(userDto: UserDto): Promise<string> {
     const user = await this.userRepository.findOne({ where: { ...userDto } });
     if (!user) throw new NotFoundException("User not found");
     return JSON.stringify(user);

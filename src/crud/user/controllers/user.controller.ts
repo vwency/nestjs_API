@@ -4,6 +4,7 @@ import { UserIdDto } from '../dto/user_id.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { UsePipes } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from '../dto/user.dto';
 
 @Controller('user')
 export class UserController {
@@ -22,11 +23,10 @@ export class UserController {
     }
     
     @ApiTags('Get user')
-    @Get(':user_id')
     @UsePipes(new ValidationPipe())
-    async id_get(@Param() userDto: UserIdDto) {
+    @Get(':username')
+    async id_get(@Param() userDto: UserDto) {
       
-      return await this.userService.getUser(userDto);
-        
+      return await this.userService.getUser(userDto);    
     }
 }

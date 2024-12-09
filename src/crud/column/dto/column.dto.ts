@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Length, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, Length, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,6 +7,11 @@ export class ColumnDto {
 
   @ApiProperty()
   @IsUUID()
+  @IsOptional()
+  username: string;
+
+  @ApiProperty()
+  @IsOptional()
   user_id: string;
 
   @ApiProperty()

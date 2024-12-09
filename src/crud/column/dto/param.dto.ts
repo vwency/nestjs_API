@@ -8,7 +8,13 @@ export class ParamDtoColumn {
   @ApiProperty()
   @IsUUID()
   @Expose()
+  @IsOptional()
   user_id: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsOptional()
+  username: string;
 
   @ApiProperty()
   @IsOptional()

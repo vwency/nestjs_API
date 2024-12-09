@@ -24,8 +24,6 @@ import { Repository } from 'typeorm';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async () => ({
-        secret: jwt_key().secretKey,
-        signOptions: { expiresIn: '1h' },
       }),
       inject: [ConfigService],
     }),
