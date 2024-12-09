@@ -8,7 +8,6 @@ import { Comments } from 'src/database/schema/comment.entity';
 import { CardController } from './controllers/card.controller';
 import { UserService } from '../user/services/user.service';
 import { CardService } from './services/card.service';
-import { JwtAuthService } from 'src/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { CrudLogic } from '../logic/crud.ts.service';
 
@@ -21,7 +20,6 @@ import { CrudLogic } from '../logic/crud.ts.service';
   providers: [
     UserService,
     CardService,
-    JwtAuthService,
     JwtService,
     CrudLogic
   ],
