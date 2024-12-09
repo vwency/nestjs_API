@@ -8,7 +8,6 @@ import { DatabaseModule } from 'src/database/database.module';
 import { CommentsController } from './controllers/comments.controller';
 import { UserService } from '../user/services/user.service';
 import { CommentsService } from './services/comments.service';
-import { JwtAuthService } from 'src/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';  // Import JwtService
 
 @Module({
@@ -17,6 +16,6 @@ import { JwtService } from '@nestjs/jwt';  // Import JwtService
     DatabaseModule,
     TypeOrmModule.forFeature([Users, Columns, Cards, Comments]),
   ],
-  providers: [UserService, CommentsService, JwtAuthService, JwtService],  // Provide JwtService here
+  providers: [UserService, CommentsService, JwtService],  // Provide JwtService here
 })
 export class CommentsModule { }
