@@ -12,6 +12,7 @@ import { CrudModule } from './crud/crud.module';
   imports: [
     AuthModule,
     CrudModule,
+    
   ],
 })
 export class AppModule {}

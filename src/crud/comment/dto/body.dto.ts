@@ -3,9 +3,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 
 
-export class IdDto {
+export class BodyDtoComment {
+
   @ApiProperty()
-  @IsUUID()
-  id: uuidv4;
-  
+  @IsString()
+  comment_name: string;
+
+  @ApiProperty()
+  @IsString()
+  description: string;
 }
