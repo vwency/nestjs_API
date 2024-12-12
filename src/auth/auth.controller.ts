@@ -24,32 +24,32 @@ export class AuthController {
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  signupLocal(@Body() dto: AuthDto): Promise<Tokens> {
-    return this.authService.signupLocal(dto);
+  async signupLocal(@Body() dto: AuthDto): Promise<Tokens> {
+    return await this.authService.signupLocal(dto);
   }
 
   @Public()
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
-    return this.authService.signinLocal(dto);
+  async signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
+    return await this.authService.signinLocal(dto);
   }
   
   @Post('logout')
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
-  logout(@GetCurrentUserId() userId: string): Promise<boolean> {
-    return this.authService.logout(userId);
+  async logout(@GetCurrentUserId() userId: string): Promise<boolean> {
+    return await this.authService.logout(userId);
   }
 
   @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refreshTokens(
+  async refreshTokens(
     @GetCurrentUserId() userId: string,
     @GetCurrentUser('refreshToken') refreshToken: string,
   ): Promise<Tokens> {
-    return this.authService.refreshTokens(userId, refreshToken);
+    return await this.authService.refreshTokens(userId, refreshToken);
   }
 }
