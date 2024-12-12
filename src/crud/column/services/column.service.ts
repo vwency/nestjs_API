@@ -24,7 +24,8 @@ export class ColumnService {
     return await this.columnRepository.findOne({ where: { ...params } });
   }
 
-  async GetColumnData(params: ParamDtoColumn): Promise<string> {
+  async GetColumnData(params: ParamDtoColumn, userId: string): Promise<string> {
+    params.user_id = userId;
     const column = await this.FindColumn(params);
     if (!column) throw new NotFoundException('Column not found');
     return JSON.stringify(column);

@@ -10,7 +10,7 @@ import { BodyCardDto } from '../dto/body.dto';
 import { BodyDtoColumn } from 'src/crud/column/dto/body.dto';
 
 
-@Controller('user/:username/columns/:column_name/cards/')
+@Controller('columns/:column_name/cards/')
 export class CardController {
   constructor(
     private readonly cardService: CardService,

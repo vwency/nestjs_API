@@ -19,7 +19,7 @@ import { CommentsService } from '../services/comments.service';
 import { ParamDtoComment } from '../dto/param.dto';
 import { BodyDtoComment } from '../dto/body.dto';
 
-@Controller('user/:username/columns/:column_name/cards/:card_name/comments/')
+@Controller('column/:column_name/card/:card_name/comment/')
 export class CommentsController {
   constructor(private readonly commentService: CommentsService) {}
 
