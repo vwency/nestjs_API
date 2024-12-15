@@ -1,1 +1,1 @@
-# Nest js tarining
+# Nest js training
