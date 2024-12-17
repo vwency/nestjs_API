@@ -1,34 +1,32 @@
 import { IsString, IsNotEmpty, Length, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
+import { Expose } from 'class-transformer';
 
 
-export class CommentDto {
+export class ParamBDtoComment {
+
+  @ApiProperty()
+  @IsUUID()
+  @Expose()
+  user_id: uuidv4;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  user_id: string;
-
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  column_name: string;
+  @Expose()
+  column_id: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  card_name: string;
+  @Expose()
+  card_id: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  @Expose()
   comment_name: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  description: string;
-
+  
 }

@@ -8,7 +8,7 @@ export class Columns {
   column_id: string;
 
   @TypeOrmColumn('uuid')
-  user_id: string;
+  user_id: uuidv4;
 
   @TypeOrmColumn()
   column_name: string;

@@ -7,7 +7,7 @@ export class Cards {
   card_id: string;
 
   @TypeOrmColumn('uuid')
-  user_id: string;
+  user_id: any;
 
   @TypeOrmColumn('uuid')
   column_id: string;

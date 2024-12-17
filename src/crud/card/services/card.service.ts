@@ -1,83 +1,87 @@
-
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Users } from '../../../database/schema/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { Columns } from 'src/database/schema/column.entity';
 import { Cards } from 'src/database/schema/card.entity';
 import { CardDto } from '../dto/card.dto';
-
+import { plainToClass } from 'class-transformer';
+import { ParamDtoCard } from '../dto/param.dto';
+import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 @Injectable()
 export class CardService {
-    constructor(
-        @InjectRepository(Users)
-        private readonly userRepository: Repository<Users>,
-        @InjectRepository(Columns)
-        private readonly columnRepository: Repository<Columns>,
-        @InjectRepository(Cards)
-        private readonly cardRepository: Repository<Cards>,
-    ) { }
+  constructor(
+    @InjectRepository(Users)
+    private readonly userRepository: Repository<Users>,
+    @InjectRepository(Columns)
+    private readonly columnRepository: Repository<Columns>,
+    @InjectRepository(Cards)
+    private readonly cardRepository: Repository<Cards>,
+    private readonly crudLogic: CrudLogic
+  ) {}
+
+  private async filterParams<T>(
+    dto: new () => T,
+    params: Record<string, any>,
+  ): Promise<Partial<T>> {
+    const instance = plainToClass(dto, {});
+    const prototype = Object.keys(instance);
+    const filteredParams = Object.keys(params)
+      .filter((key) => prototype.includes(key))
+      .reduce((acc, key) => {
+        acc[key] = params[key];
+        return acc;
+      }, {} as Partial<T>);
+
+    return filteredParams;
+  }
 
 
-    async createCard(user_id: any, column_name: string, card_name: string): Promise<any> {
+  async getCard(cardDto: ParamDtoCard): Promise<any> {
+    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
 
-        const column = await this.columnRepository.findOne({ where: { user_id, column_name } });
-        const column_id = column?.column_id;
+    return JSON.stringify(card);
+  }
 
-        const cardExisted = await this.cardRepository.findOne({ where: { user_id: user_id, column_id: column_name, card_name: card_name } });
-        if (!cardExisted) throw new BadRequestException("Card arleady existed!");
-        
+  async createCard(cardDto: CardDto): Promise<any> {
 
-        const newCard = this.cardRepository.create({ user_id, card_name, column_id });
-        const createdCard = await this.cardRepository.save(newCard);
+    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, false);
 
-        if (createdCard) return { message: 'Card created successfully' };
+    const Card = this.cardRepository.create({
+      ...cardDto,
+    });
+
+    return await this.cardRepository.save(Card);
+    throw new BadRequestException('Create error');
+  }
+
+  async deleteCard(cardDto: CardDto): Promise<any> {
     
-        throw new BadRequestException("Create error");
-    }
+    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
 
+    const CardDelete = await this.cardRepository.delete({
+      ...card,
+    });
+    if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
 
-    async getCard(cardDto: CardDto): Promise<string> {
+    throw new BadRequestException('Card was not deleted');
+  }
 
-        const cardExisted = await this.cardRepository.findOne({ where: { user_id: cardDto.id, column_id: cardDto.column_name, card_name: cardDto.card_name } });
-        if (!cardExisted) throw new BadRequestException("Card not founded");
-            
+  async updateCard(params: ParamDtoCard, updatePayload: Partial<Cards>) {
 
-        const column = await this.columnRepository.findOne({ where: { user_id: cardDto.id, column_name: cardDto.column_name } });
-        const column_id = column?.column_id;
-        const card = await this.cardRepository.findOne({ where: { user_id: cardDto.id, column_id, card_name: cardDto.card_name } });
-        return JSON.stringify(card);
-    }
+    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const { column, card } = await crudLogic.findColumnCardComment(params, true);
 
-
-
-    async deleteCard(cardDto: CardDto): Promise<any> {
-
-
-        const column = await this.columnRepository.findOne({ where: { user_id: cardDto.id, column_name: cardDto.column_name } });
-        const column_id = column?.column_id;
-        const cardExisted = await this.cardRepository.findOne({ where: { user_id: cardDto.id, column_id: cardDto.column_name, card_name: cardDto.card_name } });
-
-        if (!cardExisted) throw new NotFoundException("card not founded");
-            
-        
-        const deletedColumn = await this.cardRepository.delete({ user_id: cardDto.id, column_id, card_name: cardDto.card_name });
-        if (!!deletedColumn.affected) return { message: 'Card deleted successfully' };
-            
-
-        throw new BadRequestException("Card was not deleted");
-    }
-
-
-    async updateCard(cardDto: CardDto, new_name: string) {
-
-        const column = await this.columnRepository.findOne({ where: { user_id: cardDto.id, column_name: cardDto.column_name } });
-        const column_id = column?.column_id;
-        const card = await this.cardRepository.findOne({ where: { user_id: cardDto.id, column_id, card_name: cardDto.card_name } });
-        card.card_name = new_name;
-        await this.cardRepository.save(card);
-        return "Card updated";
-        
-    }
+    Object.assign(card, updatePayload);
+    return await this.cardRepository.save(card);
+    
+  }
 }

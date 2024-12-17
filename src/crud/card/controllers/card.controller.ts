@@ -5,39 +5,44 @@ import { ApiTags } from '@nestjs/swagger';
 import { ColumnDto } from '../../column/dto/column.dto';
 import { CardDto } from '../dto/card.dto';
 import { CardService } from '../services/card.service';
-@Controller('user/:id/columns/:column_name/cards/')
+import { ParamDtoCard } from '../dto/param.dto';
+import { BodyCardDto } from '../dto/body.dto';
+import { BodyDtoColumn } from 'src/crud/column/dto/body.dto';
+
+
+@Controller('columns/:column_name/cards/')
 export class CardController {
   constructor(
     private readonly cardService: CardService,
   ) { }
 
-  @ApiTags('Create card')
-  @Post('add')
-  @UsePipes(new ValidationPipe())
-  async createCards(@Param('id') id: ColumnDto["id"], @Param('column_name') column_name: ColumnDto["column_name"], @Body('card_name') card_name: string) {
-    return await this.cardService.createCard(id, card_name, column_name);
-  }
-
-
   @ApiTags('Get card')
   @Get(':card_name')
-  @UsePipes(new ValidationPipe())
-  async getCards(@Param() cardDto: CardDto) {
-    return await this.cardService.getCard(cardDto);
+  async getCards(@Param() params: ParamDtoCard) {
+    return await this.cardService.getCard(params);
+  }
+
+  @ApiTags('Create card')
+  @Post('add')
+  async createCard(@Param() params: ParamDtoCard, @Body() body: BodyCardDto) {
+    const payload = { ...params, ...body };
+    return await this.cardService.createCard(payload);
   }
 
 
   @ApiTags('Delete card')
   @Delete(':card_name')
-  @UsePipes(new ValidationPipe())
   async deleteCard(@Param() cardDto: CardDto) {
     return await this.cardService.deleteCard(cardDto);
   }
 
   @ApiTags('Update card')
   @Put(':card_name')
-  @UsePipes(new ValidationPipe())
-  async updateCards(@Param() cardDto: CardDto, @Body('new_name') new_name: string) {
-    return await this.cardService.updateCard(cardDto, new_name);
+  async updateColumn(
+    @Param() params: ParamDtoCard,
+    @Body() body: BodyCardDto,
+  ) {
+
+    return await this.cardService.updateCard(params, body);
   }
 }

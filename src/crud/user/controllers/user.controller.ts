@@ -1,9 +1,10 @@
 import { Controller, Body,  Get, Post, Delete, Param, Header, UseGuards, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { IdDto } from '../dto/id.dto';
+import { UserIdDto } from '../dto/user_id.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { UsePipes } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from '../dto/user.dto';
 
 @Controller('user')
 export class UserController {
@@ -22,12 +23,10 @@ export class UserController {
     }
     
     @ApiTags('Get user')
-    @Get(':id')
     @UsePipes(new ValidationPipe())
-    async id_get(@Param() indDto: IdDto) {
+    @Get(':username')
+    async id_get(@Param() userDto: UserDto) {
       
-      return await this.userService.getUser(indDto.id);
-        
+      return await this.userService.getUser(userDto);    
     }
-
 }

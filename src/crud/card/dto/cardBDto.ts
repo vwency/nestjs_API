@@ -1,24 +1,25 @@
 import { IsString, IsNotEmpty, Length, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
+import { Expose } from 'class-transformer';
 
 
-export class ColumnDto {
+export class ParamBDtoCard {
 
+  @Expose()
   @ApiProperty()
   @IsUUID()
-  @IsOptional()
-  username: string;
+  user_id: uuidv4;
 
-  @ApiProperty()
-  @IsOptional()
-  user_id: string;
-
+  @Expose()
   @ApiProperty()
   @IsString()
-  column_name: string;
+  card_name: string;
 
-  @IsString()
-  description: string;
+  @Expose()
+  @ApiProperty()
+  @IsOptional()
+  @IsUUID()
+  column_id: string;
 
 }
