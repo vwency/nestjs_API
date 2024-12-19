@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id       String   @id @default(uuid()) @db.Uuid
+  username String   @unique @db.VarChar
+  hash     String   @db.VarChar
+  email    String?  @db.VarChar
+  hashedRt String?  @db.VarChar
+
+  columns  Columns[]
+  cards    Cards[]
+  comments Comments[]
+
+  @@map("Users")
+}
+
+model Columns {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  name String   @unique @db.VarChar
+  description String   @db.VarChar
+
+  cards    Cards[]
+  comments Comments[]
+
+  user     Users    @relation(fields: [user_id], references: [id])
+
+  @@map("Columns")
+}
+
+model Cards {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  column_id   String   @db.Uuid
+  name String   @unique @db.VarChar
+  description String   @db.VarChar
+
+  user     Users    @relation(fields: [user_id], references: [id])
+  column   Columns  @relation(fields: [column_id], references: [id])
+
+  comments Comments[]
+
+  @@map("Cards")
+}
+
+model Comments {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  column_id   String   @db.Uuid
+  card_id     String   @db.Uuid
+  name String   @unique @db.VarChar
+  description String   @db.VarChar
+
+  user     Users    @relation(fields: [user_id], references: [id])
+  column   Columns  @relation(fields: [column_id], references: [id])
+  card     Cards    @relation(fields: [card_id], references: [id])
+
+  @@map("Comments")
+}

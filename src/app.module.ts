@@ -11,8 +11,6 @@ import { CrudModule } from './crud/crud.module';
   providers: [AppService],
   imports: [
     AuthModule,
-    CrudModule,
-    
   ],
 })
 export class AppModule {}
