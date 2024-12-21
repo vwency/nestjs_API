@@ -1,44 +1,21 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
-  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Columns } from 'src/database/schema/column.entity';
-import { Cards } from 'src/database/schema/card.entity';
 import { ParamDtoColumn } from 'src/crud/column/dto/param.dto';
 import { plainToClass } from 'class-transformer';
-import { Users } from 'src/database/schema/user.entity';
 import { ParamBDtoCard } from '../card/dto/cardBDto';
 import { ParamBDtoComment } from '../comment/dto/commentB.dto';
-import { Comments } from 'src/database/schema/comment.entity';
-import { ParamDtoComment } from '../comment/dto/param.dto';
 import { ParamDtoUser } from '../user/dto/param.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CrudLogic {
-  constructor(
-    @InjectRepository(Users)
-    @Optional()
-    private readonly userRepository?: Repository<Users>,
+  constructor(private prisma: PrismaService) {}
 
-    @InjectRepository(Columns)
-    @Optional()
-    private readonly columnRepository?: Repository<Columns>,
-
-    @InjectRepository(Cards)
-    @Optional()
-    private readonly cardRepository?: Repository<Cards>,
-
-    @InjectRepository(Comments)
-    @Optional()
-    private readonly commentRepository?: Repository<Comments>,
-  ) {}
-
-  private async filterParams<T>(
+  async filterParams<T>(
     dto: new () => T,
     params: Record<string, any>,
   ): Promise<Partial<T>> {
@@ -58,10 +35,9 @@ export class CrudLogic {
     dto: any,
     found: boolean,
   ): Promise<{ column: any; card: any }> {
-
     const user = await this.findUser(dto);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     dto['user_id'] = user?.user_id;
@@ -89,10 +65,9 @@ export class CrudLogic {
     dto: any,
     found: boolean,
   ): Promise<{ column: any; card: any; comment: any }> {
-
     const user = await this.findUser(dto);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     dto['user_id'] = user?.user_id;
@@ -128,28 +103,30 @@ export class CrudLogic {
 
   async findComment(params: ParamBDtoComment) {
     const filteredParams = await this.filterParams(ParamBDtoComment, params);
-    return await this.commentRepository.findOne({
+    return await this.prisma.comments.findFirst({
       where: { ...filteredParams },
     });
   }
 
-  async findCard(params: ParamBDtoCard) {
+  async findCard(params: ParamBDtoCard): Promise<any> {
     const filteredParams = await this.filterParams(ParamBDtoCard, params);
-    return await this.cardRepository.findOne({ where: { ...filteredParams } });
+
+    return await this.prisma.cards.findFirst({
+      where: { ...filteredParams },
+    });
   }
 
   async findColumn(params: ParamDtoColumn) {
     const filteredParams = await this.filterParams(ParamDtoColumn, params);
-    return await this.columnRepository.findOne({
+    return await this.prisma.columns.findFirst({
       where: { ...filteredParams },
     });
   }
 
   async findUser(params: ParamDtoUser) {
     const filteredParams = await this.filterParams(ParamDtoUser, params);
-    return await this.userRepository.findOne({
+    return await this.prisma.users.findFirst({
       where: { ...filteredParams },
     });
   }
-  
 }

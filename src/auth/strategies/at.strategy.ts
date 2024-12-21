@@ -12,7 +12,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
       secretOrKey: config.get<string>('AT_SECRET'),
     });
   }
-  
+
   validate(payload: JwtPayload) {
     return payload;
   }

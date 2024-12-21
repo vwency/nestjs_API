@@ -1,47 +1,24 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Users } from '../../../database/schema/user.entity'; 
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
-import { Columns } from 'src/database/schema/column.entity';
-import { Cards } from 'src/database/schema/card.entity';
-import { Comments } from 'src/database/schema/comment.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto } from 'src/crud/user/dto/user.dto';
-import { UserIdDto } from '../dto/user_id.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(Users) 
-    private readonly userRepository: Repository<Users>,
-    @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
-    @InjectRepository(Cards)
-    private readonly cardRepository: Repository<Cards>,
-    @InjectRepository(Comments)
-    private readonly commentRepository: Repository<Comments>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async getAll(){
-      return await this.userRepository.find();
+  async getAll() {
+    return await this.prisma.users.findMany();
   }
 
   async getUser(userDto: UserDto): Promise<string> {
-    const user = await this.userRepository.findOne({ where: { ...userDto } });
-    if (!user) throw new NotFoundException("User not found");
+    const user = await this.prisma.users.findUnique({ where: { ...userDto } });
+    if (!user) throw new NotFoundException('User not found');
     return JSON.stringify(user);
   }
-  
+
   async validateUser(userDto: UserDto): Promise<boolean> {
-    return !!(await this.userRepository.findOne({ where: { username: userDto.username } })); 
+    return !!(await this.prisma.users.findUnique({
+      where: { username: userDto.username },
+    }));
   }
-
-  async createUser(userDto: UserDto): Promise<any> {
-    if (await this.validateUser(userDto)) {
-      throw new BadRequestException("User already exists");
-    }
-    
-    return this.userRepository.save(this.userRepository.create(userDto));
-  }
-
 }

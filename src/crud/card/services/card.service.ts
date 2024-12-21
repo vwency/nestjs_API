@@ -1,87 +1,64 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Users } from '../../../database/schema/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Columns } from 'src/database/schema/column.entity';
-import { Cards } from 'src/database/schema/card.entity';
+import { Injectable } from '@nestjs/common';
 import { CardDto } from '../dto/card.dto';
-import { plainToClass } from 'class-transformer';
 import { ParamDtoCard } from '../dto/param.dto';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { BodyCardDto } from '../dto/body.dto';
+import { ParamBDtoCard } from '../dto/cardBDto';
 @Injectable()
 export class CardService {
-  constructor(
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
-    @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
-    @InjectRepository(Cards)
-    private readonly cardRepository: Repository<Cards>,
-    private readonly crudLogic: CrudLogic
-  ) {}
-
-  private async filterParams<T>(
-    dto: new () => T,
-    params: Record<string, any>,
-  ): Promise<Partial<T>> {
-    const instance = plainToClass(dto, {});
-    const prototype = Object.keys(instance);
-    const filteredParams = Object.keys(params)
-      .filter((key) => prototype.includes(key))
-      .reduce((acc, key) => {
-        acc[key] = params[key];
-        return acc;
-      }, {} as Partial<T>);
-
-    return filteredParams;
-  }
-
+  constructor(private prisma: PrismaService) {}
 
   async getCard(cardDto: ParamDtoCard): Promise<any> {
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
+    const crudLogic = new CrudLogic(this.prisma);
+    const { card } = await crudLogic.findColumnCardComment(cardDto, true);
 
     return JSON.stringify(card);
   }
 
   async createCard(cardDto: CardDto): Promise<any> {
+    const crudLogic = new CrudLogic(this.prisma);
+    const { column } = await crudLogic.findColumnCard(cardDto, false);
 
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(cardDto, false);
+    cardDto.column_id = column.column_id;
+    cardDto.column_name = undefined;
 
-    const Card = this.cardRepository.create({
-      ...cardDto,
+    const payload: ParamBDtoCard = cardDto;
+
+    const Card = await this.prisma.cards.create({
+      data: {
+        ...payload,
+      },
     });
 
-    return await this.cardRepository.save(Card);
-    throw new BadRequestException('Create error');
+    return Card;
   }
 
   async deleteCard(cardDto: CardDto): Promise<any> {
-    
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
+    const crudLogic = new CrudLogic(this.prisma);
+    const { card } = await crudLogic.findColumnCard(cardDto, true);
 
-    const CardDelete = await this.cardRepository.delete({
-      ...card,
+    const deletedCard = await this.prisma.cards.delete({
+      where: {
+        card_id: card.card_id,
+      },
     });
-    if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
 
-    throw new BadRequestException('Card was not deleted');
+    return deletedCard;
   }
 
-  async updateCard(params: ParamDtoCard, updatePayload: Partial<Cards>) {
+  async updateCard(params: ParamDtoCard, updatePayload: BodyCardDto) {
+    const crudLogic = new CrudLogic(this.prisma);
 
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(params, true);
+    const { card } = await crudLogic.findColumnCard(params, true);
 
-    Object.assign(card, updatePayload);
-    return await this.cardRepository.save(card);
-    
+    const updatedCard = await this.prisma.cards.update({
+      where: {
+        card_id: card.card_id,
+      },
+      data: updatePayload,
+    });
+
+    return updatedCard;
   }
 }

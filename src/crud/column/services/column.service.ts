@@ -1,60 +1,62 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Users } from '../../../database/schema/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
-import { Columns } from 'src/database/schema/column.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ColumnDto } from '../dto/column.dto';
 import { ParamDtoColumn } from '../dto/param.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { BodyDtoColumn } from '../dto/body.dto';
 
 @Injectable()
 export class ColumnService {
-  constructor(
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
-    @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async FindColumn(params: ParamDtoColumn): Promise<any> {
-    return await this.columnRepository.findOne({ where: { ...params } });
+    const column = await this.prisma.columns.findUnique({
+      where: { ...params },
+    });
+    if (!column) throw new NotFoundException('Column not found');
+
+    return column;
   }
 
-  async GetColumnData(params: ParamDtoColumn, userId: string): Promise<string> {
-    params.user_id = userId;
+  async GetColumnData(params: ParamDtoColumn): Promise<string> {
     const column = await this.FindColumn(params);
-    if (!column) throw new NotFoundException('Column not found');
     return JSON.stringify(column);
   }
 
-  async deleteColumn(ColumnDto: ParamDtoColumn): Promise<any> {
-    const deletedColumn = await this.columnRepository.delete({ ...ColumnDto });
+  async deleteColumn(params: ParamDtoColumn): Promise<any> {
+    const column = await this.FindColumn(params);
 
-    if (!!deletedColumn.affected)
-      return { message: 'Column deleted successfully' };
-    throw new NotFoundException('Column not found');
+    return await this.prisma.columns.delete({
+      where: {
+        column_id: column.column_id,
+      },
+    });
   }
 
   async createColumn(ColumnDto: ColumnDto): Promise<any> {
     if (await this.FindColumn(ColumnDto))
       throw new NotFoundException('Column existed found');
 
-    const newColumn = this.columnRepository.create({
-      ...ColumnDto,
+    return await this.prisma.columns.create({
+      data: {
+        ...ColumnDto,
+      },
     });
-
-    return await this.columnRepository.save(newColumn);
   }
 
-  async updateColumn(params: ParamDtoColumn, updatePayload: Partial<Columns>) {
-    const column = await this.FindColumn(params);
-    if (!column) throw new NotFoundException('Column not found');
-    Object.assign(column, updatePayload);
+  async updateColumn(params: ParamDtoColumn, updatePayload: BodyDtoColumn) {
+    const column = await this.prisma.columns.findUnique({
+      where: {
+        ...params,
+      },
+    });
 
-    return await this.columnRepository.save(column);
+    if (!column) throw new NotFoundException('Column not found');
+
+    return await this.prisma.columns.update({
+      where: { ...column },
+      data: {
+        ...updatePayload,
+      },
+    });
   }
 }
