@@ -54,6 +54,7 @@ export class ColumnService {
     if (await this.FindColumn(ColumnDto))
       throw new NotFoundException('Column existed found');
 
+
     return await this.prisma.columns.create({
       data: {
         ...ColumnDto,

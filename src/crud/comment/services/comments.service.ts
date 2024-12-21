@@ -10,6 +10,7 @@ import { CommentDto } from '../dto/comment.dto';
 import { ParamDtoComment } from '../dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
+import { BodyDtoComment } from '../dto/body.dto';
 
 @Injectable()
 export class CommentsService {
@@ -33,14 +34,20 @@ export class CommentsService {
       comDto,
       false,
     );
+  
+    comDto.column_id = column.column_id;
+    comDto.card_id = card.card_id;
 
-    const Card = this.commentRepository.create({
-      ...comDto,
+    const Card = this.prisma.comments.create({
+      data: {
+        ...comDto
+      }
     });
 
-    return await this.commentRepository.save(Card);
+    return Card;
     throw new BadRequestException('Create error');
   }
+
 
   async deleteComment(params: ParamDtoComment): Promise<any> {
     const crudLogic = new CrudLogic(this.prisma);
@@ -49,21 +56,34 @@ export class CommentsService {
       true,
     );
 
-    const CommentDelete = await this.commentRepository.delete({
-      ...comment,
+    const Delete = await this.prisma.comments.delete({
+      where: {
+        comment_id: comment.comment_id, 
+      },
     });
-  }
 
-  async updateComment(params: ParamDtoComment, updatePayload: Partial<Comments>) {
-    const crudLogic = new CrudLogic(this.prisma);
+    return Delete;
     
-    const { column, card, comment } = await crudLogic.findColumnCardComment(
-      params,
-      true,
-    );
-
-    Object.assign(comment, updatePayload);
-    return await this.commentRepository.save(comment);
   }
+
+
+async updateComment(params: ParamDtoComment, updatePayload: BodyDtoComment) {
+  const crudLogic = new CrudLogic(this.prisma);
+  
+  const { column, card, comment } = await crudLogic.findColumnCardComment(
+    params,
+    true,
+  );
+
+  const updatedComment = await this.prisma.comments.update({
+    where: {
+      comment_id: comment.comment_id,  
+    },
+    data: updatePayload, 
+  });
+
+  return updatedComment;  
+}
+
 
 }

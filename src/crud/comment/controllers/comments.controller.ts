@@ -31,7 +31,8 @@ export class CommentsController {
   }
 
   @Post('add')
-  async addComment(@Param() params: ParamDtoComment, @Body() body: BodyDtoComment) {
+  async addComment(
+    @Param() params: ParamDtoComment, @Body() body: BodyDtoComment) {
     const comDto = { ...params, ...body };
     return await this.commentService.createComment(comDto);
   }

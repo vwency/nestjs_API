@@ -6,21 +6,15 @@ import {
   Post,
   Delete,
   Param,
-  Header,
-  BadRequestException,
-  NotFoundException,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ColumnDto } from '../dto/column.dto';
 import { ColumnService } from '../services/column.service';
-import { v4 as uuidv4 } from 'uuid';
 import { ParamDtoColumn } from '../dto/param.dto';
 import { BodyDtoColumn } from '../dto/body.dto';
-import { GetCurrentUser, GetCurrentUserId } from 'src/auth/common/decorators';
-import { UserDto } from 'src/crud/user/dto/user.dto';
+import { GetCurrentUserId } from 'src/auth/common/decorators';
 import { AtGuard } from 'src/auth/common/guards';
 
 @Controller('column/')
@@ -47,9 +41,11 @@ export class ColumnController {
     @Body() body: BodyDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    const payload = { ...params, ...body };
-
-    return await this.ColumnService.createColumn(payload);
+    return await this.ColumnService.createColumn({
+      ...params,
+      ...body,
+      user_id: userId,
+    });
   }
 
   @ApiTags('Delete column')
@@ -60,8 +56,12 @@ export class ColumnController {
     @Param() params: ParamDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.deleteColumn(params);
+    return await this.ColumnService.deleteColumn({
+      ...params,
+      user_id: userId,
+    });
   }
+
 
   @ApiTags('Update column')
   @UseGuards(AtGuard)
@@ -71,6 +71,9 @@ export class ColumnController {
     @Body() body: BodyDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.updateColumn(params, body);
+    return await this.ColumnService.updateColumn(
+      { ...params, user_id: userId }, 
+      body
+    );
   }
 }

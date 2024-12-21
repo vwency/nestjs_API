@@ -3,6 +3,7 @@ import { CardDto } from '../dto/card.dto';
 import { ParamDtoCard } from '../dto/param.dto';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BodyCardDto } from '../dto/body.dto';
 @Injectable()
 export class CardService {
   constructor(
@@ -38,13 +39,15 @@ export class CardService {
     const { column, card } = await crudLogic.findColumnCard(cardDto, true);
 
     const deletedCard = await this.prisma.cards.delete({
-      ...card,
+      where: {
+        card_id: card.card_id
+      }
     });
 
     return deletedCard;
   }
 
-  async updateCard(params: ParamDtoCard, updatePayload: CardDto) {
+  async updateCard(params: ParamDtoCard, updatePayload: BodyCardDto) {
     const crudLogic = new CrudLogic(this.prisma);
     
     const { column, card } = await crudLogic.findColumnCard(params, true);
