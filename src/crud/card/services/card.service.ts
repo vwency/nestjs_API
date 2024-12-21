@@ -65,5 +65,3 @@ export class CardService {
     return updatedCard;
   }
 }
-
-

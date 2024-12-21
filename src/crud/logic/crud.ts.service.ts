@@ -1,23 +1,19 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
-  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ParamDtoColumn } from 'src/crud/column/dto/param.dto';
 import { plainToClass } from 'class-transformer';
 import { ParamBDtoCard } from '../card/dto/cardBDto';
 import { ParamBDtoComment } from '../comment/dto/commentB.dto';
-import { ParamDtoComment } from '../comment/dto/param.dto';
 import { ParamDtoUser } from '../user/dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CrudLogic {
-  constructor(
-    private prisma: PrismaService
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async filterParams<T>(
     dto: new () => T,
@@ -41,7 +37,7 @@ export class CrudLogic {
   ): Promise<{ column: any; card: any }> {
     const user = await this.findUser(dto);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     dto['user_id'] = user?.user_id;
@@ -71,7 +67,7 @@ export class CrudLogic {
   ): Promise<{ column: any; card: any; comment: any }> {
     const user = await this.findUser(dto);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException();
     }
 
     dto['user_id'] = user?.user_id;

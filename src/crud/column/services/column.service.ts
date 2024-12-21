@@ -16,7 +16,11 @@ export class ColumnService {
 
 
   async FindColumn(params: ParamDtoColumn): Promise<any> {
-    return await this.prisma.columns.findUnique({ where: { ...params } });
+
+    const column = await this.prisma.columns.findUnique({ where: { ...params } });
+    if (!column) throw new NotFoundException('Column not found');
+
+    return column;
   }
 
 
@@ -26,8 +30,6 @@ export class ColumnService {
   async GetColumnData(params: ParamDtoColumn): Promise<string> {
 
     const column = await this.FindColumn(params);
-
-    if (!column) throw new NotFoundException('Column not found');
     return JSON.stringify(column);
   }
 
@@ -37,8 +39,6 @@ export class ColumnService {
   async deleteColumn(params: ParamDtoColumn): Promise<any> {
 
     const column = await this.FindColumn(params);
-
-    if (!column) throw new NotFoundException('Column not found');
 
     return await this.prisma.columns.delete({
       where: { user_id: params.user_id, column_name: params.column_name },

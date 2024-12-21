@@ -11,10 +11,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { ValidationPipe } from '@nestjs/common';
-import { UsePipes } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CommentDto } from '../dto/comment.dto';
 import { CommentsService } from '../services/comments.service';
 import { ParamDtoComment } from '../dto/param.dto';
 import { BodyDtoComment } from '../dto/body.dto';

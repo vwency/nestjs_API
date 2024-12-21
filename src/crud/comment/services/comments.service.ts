@@ -1,20 +1,13 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';;
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CommentDto } from '../dto/comment.dto';
 import { ParamDtoComment } from '../dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 import { BodyDtoComment } from '../dto/body.dto';
-import { CommandFailedEvent } from 'typeorm';
 
 @Injectable()
 export class CommentsService {
-  constructor(
-    private prisma: PrismaService
-  ) {}
-
+  constructor(private prisma: PrismaService) {}
 
   async getComment(params: ParamDtoComment): Promise<string> {
     const crudLogic = new CrudLogic(this.prisma);
@@ -32,22 +25,21 @@ export class CommentsService {
       comDto,
       false,
     );
-  
+
     comDto.column_id = column.column_id;
     comDto.card_id = card.card_id;
     comDto.column_name = undefined;
     comDto.card_name = undefined;
-  
+
     const Comment = this.prisma.comments.create({
       data: {
-        ...comDto
-      }
+        ...comDto,
+      },
     });
 
     return Comment;
     throw new BadRequestException('Create error');
   }
-
 
   async deleteComment(params: ParamDtoComment): Promise<any> {
     const crudLogic = new CrudLogic(this.prisma);
@@ -58,32 +50,28 @@ export class CommentsService {
 
     const Delete = await this.prisma.comments.delete({
       where: {
-        comment_id: comment.comment_id, 
+        comment_id: comment.comment_id,
       },
     });
 
     return Delete;
-    
   }
 
+  async updateComment(params: ParamDtoComment, updatePayload: BodyDtoComment) {
+    const crudLogic = new CrudLogic(this.prisma);
 
-async updateComment(params: ParamDtoComment, updatePayload: BodyDtoComment) {
-  const crudLogic = new CrudLogic(this.prisma);
-  
-  const { column, card, comment } = await crudLogic.findColumnCardComment(
-    params,
-    true,
-  );
+    const { column, card, comment } = await crudLogic.findColumnCardComment(
+      params,
+      true,
+    );
 
-  const updatedComment = await this.prisma.comments.update({
-    where: {
-      comment_id: comment.comment_id,  
-    },
-    data: updatePayload, 
-  });
+    const updatedComment = await this.prisma.comments.update({
+      where: {
+        comment_id: comment.comment_id,
+      },
+      data: updatePayload,
+    });
 
-  return updatedComment;  
-}
-
-
+    return updatedComment;
+  }
 }

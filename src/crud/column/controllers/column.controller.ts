@@ -29,9 +29,10 @@ export class ColumnController {
     @Param() params: ParamDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.GetColumnData(
-      { ...params, user_id: userId }
-    );
+    return await this.ColumnService.GetColumnData({
+      ...params,
+      user_id: userId,
+    });
   }
 
   @ApiTags('Create column')
@@ -64,7 +65,6 @@ export class ColumnController {
     });
   }
 
-
   @ApiTags('Update column')
   @UseGuards(AtGuard)
   @Put(':column_name')
@@ -74,8 +74,8 @@ export class ColumnController {
     @GetCurrentUserId() userId: string,
   ) {
     return await this.ColumnService.updateColumn(
-      { ...params, user_id: userId }, 
-      body
+      { ...params, user_id: userId },
+      body,
     );
   }
 }
