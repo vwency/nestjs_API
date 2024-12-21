@@ -7,6 +7,7 @@ import { ParamDtoComment } from '../dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 import { BodyDtoComment } from '../dto/body.dto';
+import { CommandFailedEvent } from 'typeorm';
 
 @Injectable()
 export class CommentsService {
@@ -34,14 +35,16 @@ export class CommentsService {
   
     comDto.column_id = column.column_id;
     comDto.card_id = card.card_id;
-
-    const Card = this.prisma.comments.create({
+    comDto.column_name = undefined;
+    comDto.card_name = undefined;
+  
+    const Comment = this.prisma.comments.create({
       data: {
         ...comDto
       }
     });
 
-    return Card;
+    return Comment;
     throw new BadRequestException('Create error');
   }
 

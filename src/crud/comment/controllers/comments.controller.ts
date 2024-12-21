@@ -19,6 +19,7 @@ import { CommentsService } from '../services/comments.service';
 import { ParamDtoComment } from '../dto/param.dto';
 import { BodyDtoComment } from '../dto/body.dto';
 import { GetCurrentUserId } from 'src/auth/common/decorators';
+import { AtGuard } from 'src/auth/common/guards';
 
 @Controller('column/:column_name/card/:card_name/comment/')
 export class CommentsController {
@@ -31,6 +32,7 @@ export class CommentsController {
   }
 
   @Post('add')
+  @UseGuards(AtGuard)
   async addComment(
     @Param() params: ParamDtoComment,
     @Body() body: BodyDtoComment,
@@ -41,6 +43,7 @@ export class CommentsController {
   }
   
   @ApiTags('Delete comment')
+  @UseGuards(AtGuard)
   @Delete(':comment_name')
   async deleteComment(
     @Param() params: ParamDtoComment,
@@ -53,6 +56,7 @@ export class CommentsController {
   }
 
   @ApiTags('Update comment')
+  @UseGuards(AtGuard)
   @Put(':card_name')
   async updateColumn(
     @Param() params: ParamDtoComment,

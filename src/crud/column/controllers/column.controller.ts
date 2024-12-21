@@ -29,7 +29,9 @@ export class ColumnController {
     @Param() params: ParamDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.GetColumnData(params, userId);
+    return await this.ColumnService.GetColumnData(
+      { ...params, user_id: userId }
+    );
   }
 
   @ApiTags('Create column')

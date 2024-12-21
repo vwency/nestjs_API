@@ -23,9 +23,8 @@ export class ColumnService {
 
 
 
-  async GetColumnData(params: ParamDtoColumn, userId: string): Promise<string> {
+  async GetColumnData(params: ParamDtoColumn): Promise<string> {
 
-    params.user_id = userId;
     const column = await this.FindColumn(params);
 
     if (!column) throw new NotFoundException('Column not found');
