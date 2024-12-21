@@ -7,7 +7,7 @@ import { CardDto } from '../dto/card.dto';
 import { CardService } from '../services/card.service';
 import { ParamDtoCard } from '../dto/param.dto';
 import { BodyCardDto } from '../dto/body.dto';
-import { BodyDtoColumn } from 'src/crud/column/dto/body.dto';
+import { GetCurrentUserId } from 'src/auth/common/decorators';
 
 
 @Controller('columns/:column_name/cards/')
@@ -24,16 +24,25 @@ export class CardController {
 
   @ApiTags('Create card')
   @Post('add')
-  async createCard(@Param() params: ParamDtoCard, @Body() body: BodyCardDto) {
-    const payload = { ...params, ...body };
+  async createCard(
+    @Param() params: ParamDtoCard, 
+    @Body() body: BodyCardDto,
+    @GetCurrentUserId() userId: string,
+  ) {
+    const payload = { ...params, ...body, user_id: userId };
     return await this.cardService.createCard(payload);
   }
 
 
   @ApiTags('Delete card')
   @Delete(':card_name')
-  async deleteCard(@Param() cardDto: CardDto) {
-    return await this.cardService.deleteCard(cardDto);
+  async deleteCard(
+    @Param() cardDto: CardDto,
+    @GetCurrentUserId() userId: string,
+  ) {
+    return await this.cardService.deleteCard({ 
+      ...cardDto, user_id: userId 
+    });
   }
 
   @ApiTags('Update card')
@@ -41,8 +50,13 @@ export class CardController {
   async updateColumn(
     @Param() params: ParamDtoCard,
     @Body() body: BodyCardDto,
+    @GetCurrentUserId() userId: string,
   ) {
 
-    return await this.cardService.updateCard(params, body);
+    return await this.cardService.updateCard(
+      {...params, user_id: userId}, 
+      body
+    );
   }
 }
+

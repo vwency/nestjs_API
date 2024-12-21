@@ -18,11 +18,11 @@ import { CommentDto } from '../dto/comment.dto';
 import { CommentsService } from '../services/comments.service';
 import { ParamDtoComment } from '../dto/param.dto';
 import { BodyDtoComment } from '../dto/body.dto';
+import { GetCurrentUserId } from 'src/auth/common/decorators';
 
 @Controller('column/:column_name/card/:card_name/comment/')
 export class CommentsController {
   constructor(private readonly commentService: CommentsService) {}
-
 
   @ApiTags('Get comment')
   @Get(':comment_name')
@@ -32,14 +32,23 @@ export class CommentsController {
 
   @Post('add')
   async addComment(
-    @Param() params: ParamDtoComment, @Body() body: BodyDtoComment) {
-    const comDto = { ...params, ...body };
+    @Param() params: ParamDtoComment,
+    @Body() body: BodyDtoComment,
+    @GetCurrentUserId() userId: string,
+  ) {
+    const comDto = { ...params, user_id: userId, ...body };
     return await this.commentService.createComment(comDto);
   }
   @ApiTags('Delete comment')
   @Delete(':comment_name')
-  async deleteComment(@Param() params: ParamDtoComment) {
-    return await this.commentService.deleteComment(params);
+  async deleteComment(
+    @Param() params: ParamDtoComment,
+    @GetCurrentUserId() userId: string,
+  ) {
+    return await this.commentService.deleteComment({
+      ...params,
+      user_id: userId,
+    });
   }
 
   @ApiTags('Update comment')
@@ -47,9 +56,13 @@ export class CommentsController {
   async updateColumn(
     @Param() params: ParamDtoComment,
     @Body() body: BodyDtoComment,
+    @GetCurrentUserId() userId: string,
   ) {
-
-    return await this.commentService.updateComment(params, body);
+    return await this.commentService.updateComment(
+      { ...params, user_id: userId },
+      body,
+    );
   }
-
 }
+
+

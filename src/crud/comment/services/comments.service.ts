@@ -18,6 +18,7 @@ export class CommentsService {
     private prisma: PrismaService
   ) {}
 
+  
   async getComment(params: ParamDtoComment): Promise<string> {
     const crudLogic = new CrudLogic(this.prisma);
     const { column, card, comment } = await crudLogic.findColumnCardComment(
