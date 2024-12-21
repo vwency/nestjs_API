@@ -19,7 +19,7 @@ import { AtGuard } from 'src/auth/common/guards';
 
 @Controller('column/')
 export class ColumnController {
-  constructor(private readonly ColumnService: ColumnService) {}
+  constructor(private readonly columnService: ColumnService) {}
 
   @ApiTags('Get column')
   @UseGuards(AtGuard)
@@ -29,7 +29,7 @@ export class ColumnController {
     @Param() params: ParamDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.GetColumnData({
+    return await this.columnService.GetColumnData({
       ...params,
       user_id: userId,
     });
@@ -44,7 +44,7 @@ export class ColumnController {
     @Body() body: BodyDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.createColumn({
+    return await this.columnService.createColumn({
       ...params,
       ...body,
       user_id: userId,
@@ -59,7 +59,7 @@ export class ColumnController {
     @Param() params: ParamDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.deleteColumn({
+    return await this.columnService.deleteColumn({
       ...params,
       user_id: userId,
     });
@@ -73,7 +73,7 @@ export class ColumnController {
     @Body() body: BodyDtoColumn,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.ColumnService.updateColumn(
+    return await this.columnService.updateColumn(
       { ...params, user_id: userId },
       body,
     );

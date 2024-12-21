@@ -8,11 +8,6 @@ import { CrudLogic } from '../logic/crud.ts.service';
 @Module({
   controllers: [CardController],
   imports: [],
-  providers: [
-    UserService,
-    CardService,
-    JwtService,
-    CrudLogic
-  ],
+  providers: [UserService, CardService, JwtService, CrudLogic],
 })
-export class CardModule { }
+export class CardModule {}

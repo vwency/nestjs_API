@@ -5,12 +5,7 @@ import { ColumnService } from './services/column.service';
 
 @Module({
   controllers: [ColumnController],
-  imports: [
-  ],
-  providers: [
-    ColumnService,
-    JwtService,
-  ],
+  imports: [],
+  providers: [ColumnService, JwtService],
 })
-export class ColumnModule { }
-
+export class ColumnModule {}

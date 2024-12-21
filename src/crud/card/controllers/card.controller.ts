@@ -1,8 +1,14 @@
-import { Controller, Body, Put, Get, Post, Delete, Param, Header, UseGuards, BadRequestException, NotFoundException } from '@nestjs/common';
-import { ValidationPipe } from '@nestjs/common';
-import { UsePipes } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Put,
+  Get,
+  Post,
+  Delete,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ColumnDto } from '../../column/dto/column.dto';
 import { CardDto } from '../dto/card.dto';
 import { CardService } from '../services/card.service';
 import { ParamDtoCard } from '../dto/param.dto';
@@ -10,12 +16,9 @@ import { BodyCardDto } from '../dto/body.dto';
 import { GetCurrentUserId } from 'src/auth/common/decorators';
 import { AtGuard } from 'src/auth/common/guards';
 
-
 @Controller('column/:column_name/card/')
 export class CardController {
-  constructor(
-    private readonly cardService: CardService,
-  ) { }
+  constructor(private readonly cardService: CardService) {}
 
   @ApiTags('Get card')
   @Get(':card_name')
@@ -27,14 +30,13 @@ export class CardController {
   @UseGuards(AtGuard)
   @Post('add')
   async createCard(
-    @Param() params: ParamDtoCard, 
+    @Param() params: ParamDtoCard,
     @Body() body: BodyCardDto,
     @GetCurrentUserId() userId: string,
   ) {
     const payload = { ...params, ...body, user_id: userId };
     return await this.cardService.createCard(payload);
   }
-
 
   @ApiTags('Delete card')
   @UseGuards(AtGuard)
@@ -43,8 +45,9 @@ export class CardController {
     @Param() cardDto: CardDto,
     @GetCurrentUserId() userId: string,
   ) {
-    return await this.cardService.deleteCard({ 
-      ...cardDto, user_id: userId 
+    return await this.cardService.deleteCard({
+      ...cardDto,
+      user_id: userId,
     });
   }
 
@@ -56,11 +59,9 @@ export class CardController {
     @Body() body: BodyCardDto,
     @GetCurrentUserId() userId: string,
   ) {
-
     return await this.cardService.updateCard(
-      {...params, user_id: userId}, 
-      body
+      { ...params, user_id: userId },
+      body,
     );
   }
 }
-

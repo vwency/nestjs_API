@@ -1,13 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto } from 'src/crud/user/dto/user.dto';
-import { UserIdDto } from '../dto/user_id.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()

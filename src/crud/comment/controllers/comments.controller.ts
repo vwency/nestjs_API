@@ -6,10 +6,7 @@ import {
   Post,
   Delete,
   Param,
-  Header,
   UseGuards,
-  BadRequestException,
-  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CommentsService } from '../services/comments.service';
@@ -38,7 +35,7 @@ export class CommentsController {
     const comDto = { ...params, user_id: userId, ...body };
     return await this.commentService.createComment(comDto);
   }
-  
+
   @ApiTags('Delete comment')
   @UseGuards(AtGuard)
   @Delete(':comment_name')
@@ -66,5 +63,3 @@ export class CommentsController {
     );
   }
 }
-
-

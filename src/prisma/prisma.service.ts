@@ -30,7 +30,6 @@ export class PrismaService
   async cleanDatabase() {
     if (process.env.NODE_ENV === 'production') return;
 
-    
     return Promise.all([this.users.deleteMany()]);
   }
 }

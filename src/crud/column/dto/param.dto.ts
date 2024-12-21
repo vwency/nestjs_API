@@ -1,10 +1,8 @@
-import { IsString, IsNotEmpty, Length, IsUUID, IsOptional } from 'class-validator';
+import { IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-
 export class ParamDtoColumn {
-
   @ApiProperty()
   @IsUUID()
   @Expose()
@@ -15,5 +13,4 @@ export class ParamDtoColumn {
   @IsOptional()
   @Expose()
   column_name: string;
-
 }

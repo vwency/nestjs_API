@@ -15,10 +15,9 @@ export class AuthService {
   ) {}
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
-    
     const User = await this.prisma.users.findUnique({
       where: {
-        username: dto.username,  
+        username: dto.username,
       },
     });
 

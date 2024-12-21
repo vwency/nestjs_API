@@ -1,11 +1,9 @@
-import { IsString, IsNotEmpty, Length, IsUUID, IsOptional } from 'class-validator';
+import { IsString, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 import { Expose } from 'class-transformer';
 
-
 export class ParamDtoComment {
-
   @Expose()
   @ApiProperty()
   @IsUUID()
@@ -32,5 +30,4 @@ export class ParamDtoComment {
   @IsOptional()
   @IsUUID()
   card_id: string;
-
 }

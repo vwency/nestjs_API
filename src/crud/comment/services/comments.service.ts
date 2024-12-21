@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommentDto } from '../dto/comment.dto';
 import { ParamDtoComment } from '../dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,17 +11,14 @@ export class CommentsService {
 
   async getComment(params: ParamDtoComment): Promise<string> {
     const crudLogic = new CrudLogic(this.prisma);
-    const { column, card, comment } = await crudLogic.findColumnCardComment(
-      params,
-      true,
-    );
+    const { comment } = await crudLogic.findColumnCardComment(params, true);
 
     return JSON.stringify(comment);
   }
 
   async createComment(comDto: CommentDto): Promise<any> {
     const crudLogic = new CrudLogic(this.prisma);
-    const { column, card, comment } = await crudLogic.findColumnCardComment(
+    const { column, card } = await crudLogic.findColumnCardComment(
       comDto,
       false,
     );
@@ -38,15 +35,11 @@ export class CommentsService {
     });
 
     return Comment;
-    throw new BadRequestException('Create error');
   }
 
   async deleteComment(params: ParamDtoComment): Promise<any> {
     const crudLogic = new CrudLogic(this.prisma);
-    const { column, card, comment } = await crudLogic.findColumnCardComment(
-      params,
-      true,
-    );
+    const { comment } = await crudLogic.findColumnCardComment(params, true);
 
     const Delete = await this.prisma.comments.delete({
       where: {
@@ -60,10 +53,7 @@ export class CommentsService {
   async updateComment(params: ParamDtoComment, updatePayload: BodyDtoComment) {
     const crudLogic = new CrudLogic(this.prisma);
 
-    const { column, card, comment } = await crudLogic.findColumnCardComment(
-      params,
-      true,
-    );
+    const { comment } = await crudLogic.findColumnCardComment(params, true);
 
     const updatedComment = await this.prisma.comments.update({
       where: {
