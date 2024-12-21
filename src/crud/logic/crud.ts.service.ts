@@ -19,7 +19,7 @@ export class CrudLogic {
     private prisma: PrismaService
   ) {}
 
-  private async filterParams<T>(
+  async filterParams<T>(
     dto: new () => T,
     params: Record<string, any>,
   ): Promise<Partial<T>> {

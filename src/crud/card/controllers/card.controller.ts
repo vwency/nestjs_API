@@ -8,9 +8,10 @@ import { CardService } from '../services/card.service';
 import { ParamDtoCard } from '../dto/param.dto';
 import { BodyCardDto } from '../dto/body.dto';
 import { GetCurrentUserId } from 'src/auth/common/decorators';
+import { AtGuard } from 'src/auth/common/guards';
 
 
-@Controller('columns/:column_name/cards/')
+@Controller('column/:column_name/card/')
 export class CardController {
   constructor(
     private readonly cardService: CardService,
@@ -23,6 +24,7 @@ export class CardController {
   }
 
   @ApiTags('Create card')
+  @UseGuards(AtGuard)
   @Post('add')
   async createCard(
     @Param() params: ParamDtoCard, 
@@ -35,6 +37,7 @@ export class CardController {
 
 
   @ApiTags('Delete card')
+  @UseGuards(AtGuard)
   @Delete(':card_name')
   async deleteCard(
     @Param() cardDto: CardDto,
@@ -46,6 +49,7 @@ export class CardController {
   }
 
   @ApiTags('Update card')
+  @UseGuards(AtGuard)
   @Put(':card_name')
   async updateColumn(
     @Param() params: ParamDtoCard,

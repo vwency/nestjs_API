@@ -1,11 +1,7 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
-  ParamData,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+} from '@nestjs/common';;
 import { CommentDto } from '../dto/comment.dto';
 import { ParamDtoComment } from '../dto/param.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,7 +14,7 @@ export class CommentsService {
     private prisma: PrismaService
   ) {}
 
-  
+
   async getComment(params: ParamDtoComment): Promise<string> {
     const crudLogic = new CrudLogic(this.prisma);
     const { column, card, comment } = await crudLogic.findColumnCardComment(

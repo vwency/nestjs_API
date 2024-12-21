@@ -8,8 +8,13 @@ export class ParamBDtoCard {
 
   @Expose()
   @ApiProperty()
+  user_id: string;
+
+  @Expose()
+  @ApiProperty()
+  @IsOptional()
   @IsUUID()
-  user_id: uuidv4;
+  column_id: string;
 
   @Expose()
   @ApiProperty()
@@ -19,7 +24,7 @@ export class ParamBDtoCard {
   @Expose()
   @ApiProperty()
   @IsOptional()
-  @IsUUID()
-  column_id: string;
+  @IsString()
+  description: string;
 
 }

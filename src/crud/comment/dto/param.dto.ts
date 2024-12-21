@@ -6,6 +6,7 @@ import { Expose } from 'class-transformer';
 
 export class ParamDtoComment {
 
+  @Expose()
   @ApiProperty()
   @IsUUID()
   user_id: uuidv4;
