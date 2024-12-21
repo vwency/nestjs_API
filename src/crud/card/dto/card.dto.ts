@@ -12,7 +12,12 @@ export class CardDto {
   @ApiProperty()
   @IsUUID()
   user_id: uuidv4;
-  
+
+  @ApiProperty()
+  @IsOptional()
+  @IsUUID()
+  column_id: string;
+
   @ApiProperty()
   @IsString()
   card_name: string;
@@ -22,8 +27,4 @@ export class CardDto {
   @IsOptional()
   description: string;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsUUID()
-  column_id: string;
 }

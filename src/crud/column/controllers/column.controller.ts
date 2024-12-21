@@ -45,6 +45,7 @@ export class ColumnController {
   async createColumn(
     @Param() params: ParamDtoColumn,
     @Body() body: BodyDtoColumn,
+    @GetCurrentUserId() userId: string,
   ) {
     const payload = { ...params, ...body };
 
@@ -55,7 +56,10 @@ export class ColumnController {
   @UseGuards(AtGuard)
   @Delete(':column_name')
   @UsePipes(new ValidationPipe())
-  async DeleteColumn(@Param() params: ParamDtoColumn) {
+  async DeleteColumn(
+    @Param() params: ParamDtoColumn,
+    @GetCurrentUserId() userId: string,
+  ) {
     return await this.ColumnService.deleteColumn(params);
   }
 
@@ -65,6 +69,7 @@ export class ColumnController {
   async updateColumn(
     @Param() params: ParamDtoColumn,
     @Body() body: BodyDtoColumn,
+    @GetCurrentUserId() userId: string,
   ) {
     return await this.ColumnService.updateColumn(params, body);
   }

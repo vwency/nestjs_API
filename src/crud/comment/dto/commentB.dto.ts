@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Length, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, Length, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 import { Expose } from 'class-transformer';
@@ -28,5 +28,4 @@ export class ParamBDtoComment {
   @IsNotEmpty()
   @Expose()
   comment_name: string;
-  
 }

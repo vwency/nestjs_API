@@ -1,49 +1,17 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Users } from '../../../database/schema/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Columns } from 'src/database/schema/column.entity';
-import { Cards } from 'src/database/schema/card.entity';
+import {Injectable} from '@nestjs/common';
 import { CardDto } from '../dto/card.dto';
-import { plainToClass } from 'class-transformer';
 import { ParamDtoCard } from '../dto/param.dto';
 import { CrudLogic } from 'src/crud/logic/crud.ts.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class CardService {
   constructor(
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
-    @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
-    @InjectRepository(Cards)
-    private readonly cardRepository: Repository<Cards>,
-    private readonly crudLogic: CrudLogic
+    private prisma: PrismaService,
   ) {}
-
-  private async filterParams<T>(
-    dto: new () => T,
-    params: Record<string, any>,
-  ): Promise<Partial<T>> {
-    const instance = plainToClass(dto, {});
-    const prototype = Object.keys(instance);
-    const filteredParams = Object.keys(params)
-      .filter((key) => prototype.includes(key))
-      .reduce((acc, key) => {
-        acc[key] = params[key];
-        return acc;
-      }, {} as Partial<T>);
-
-    return filteredParams;
-  }
 
 
   async getCard(cardDto: ParamDtoCard): Promise<any> {
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
+    const crudLogic = new CrudLogic(this.prisma);
     const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
 
     return JSON.stringify(card);
@@ -51,37 +19,43 @@ export class CardService {
 
   async createCard(cardDto: CardDto): Promise<any> {
 
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(cardDto, false);
+    const crudLogic = new CrudLogic(this.prisma);
+    const { column, card } = await crudLogic.findColumnCard(cardDto, false);
+    cardDto.column_id = column.column_id;
 
-    const Card = this.cardRepository.create({
-      ...cardDto,
+    const Card = await this.prisma.cards.create({
+      data: {
+        ...cardDto
+      }
     });
 
-    return await this.cardRepository.save(Card);
-    throw new BadRequestException('Create error');
+    return Card;
   }
 
   async deleteCard(cardDto: CardDto): Promise<any> {
     
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(cardDto, true);
+    const crudLogic = new CrudLogic(this.prisma);
+    const { column, card } = await crudLogic.findColumnCard(cardDto, true);
 
-    const CardDelete = await this.cardRepository.delete({
+    const deletedCard = await this.prisma.cards.delete({
       ...card,
     });
-    if (!!CardDelete.affected) return { message: 'Card deleted successfully' };
 
-    throw new BadRequestException('Card was not deleted');
+    return deletedCard;
   }
 
-  async updateCard(params: ParamDtoCard, updatePayload: Partial<Cards>) {
-
-    const crudLogic = new CrudLogic(this.userRepository, this.columnRepository, this.cardRepository);
-    const { column, card } = await crudLogic.findColumnCardComment(params, true);
-
-    Object.assign(card, updatePayload);
-    return await this.cardRepository.save(card);
+  async updateCard(params: ParamDtoCard, updatePayload: CardDto) {
+    const crudLogic = new CrudLogic(this.prisma);
     
+    const { column, card } = await crudLogic.findColumnCard(params, true);
+  
+    const updatedCard = await this.prisma.cards.update({
+      where: {
+        card_id: card.card_id,  
+      },
+      data: updatePayload, 
+    });
+  
+    return updatedCard; 
   }
 }

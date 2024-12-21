@@ -12,11 +12,6 @@ export class ParamDtoColumn {
   user_id: string;
 
   @ApiProperty()
-  @Expose()
-  @IsOptional()
-  username: string;
-
-  @ApiProperty()
   @IsOptional()
   @Expose()
   column_name: string;

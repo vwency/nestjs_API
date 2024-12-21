@@ -36,8 +36,8 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.getTokens(user.id, user.username);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    const tokens = await this.getTokens(user.user_id, user.username);
+    await this.updateRtHash(user.user_id, tokens.refresh_token);
 
     return tokens;
   }
@@ -52,8 +52,8 @@ export class AuthService {
     const passwordMatches = await argon.verify(User.hash, dto.password);
     if (!passwordMatches) throw new ForbiddenException('Access Denied');
 
-    const tokens = await this.getTokens(User.id, User.username);
-    await this.updateRtHash(User.id, tokens.refresh_token);
+    const tokens = await this.getTokens(User.user_id, User.username);
+    await this.updateRtHash(User.user_id, tokens.refresh_token);
 
     return tokens;
   }
@@ -61,7 +61,7 @@ export class AuthService {
   async logout(userId: string): Promise<boolean> {
     await this.prisma.users.updateMany({
       where: {
-        id: userId,
+        user_id: userId,
         hashedRt: {
           not: null,
         },
@@ -76,7 +76,7 @@ export class AuthService {
   async refreshTokens(userId: string, rt: string): Promise<Tokens> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id: userId,
+        user_id: userId,
       },
     });
 
@@ -85,8 +85,8 @@ export class AuthService {
     const rtMatches = await argon.verify(user.hashedRt, rt);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    const tokens = await this.getTokens(user.user_id, user.email);
+    await this.updateRtHash(user.user_id, tokens.refresh_token);
 
     return tokens;
   }
@@ -95,7 +95,7 @@ export class AuthService {
     const hash = await argon.hash(rt);
     await this.prisma.users.update({
       where: {
-        id: userId,
+        user_id: userId,
       },
       data: {
         hashedRt: hash,

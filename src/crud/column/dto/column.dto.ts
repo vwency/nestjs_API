@@ -4,12 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export class ColumnDto {
-
-  @ApiProperty()
-  @IsUUID()
-  @IsOptional()
-  username: string;
-
+  
   @ApiProperty()
   @IsOptional()
   user_id: string;

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Users {
-  id       String   @id @default(uuid()) @db.Uuid
+  user_id       String   @id @default(uuid()) @db.Uuid
   username String   @unique @db.VarChar
   hash     String   @db.VarChar
   email    String?  @db.VarChar
@@ -22,28 +22,28 @@ model Users {
 }
 
 model Columns {
-  id          String   @id @default(uuid()) @db.Uuid
+  column_id          String   @id @default(uuid()) @db.Uuid
   user_id     String   @db.Uuid
-  name String   @unique @db.VarChar
+  column_name        String   @unique @db.VarChar
   description String   @db.VarChar
 
   cards    Cards[]
   comments Comments[]
 
-  user     Users    @relation(fields: [user_id], references: [id])
+  user     Users    @relation(fields: [user_id], references: [user_id])
 
   @@map("Columns")
 }
 
 model Cards {
-  id          String   @id @default(uuid()) @db.Uuid
+  card_id          String   @id @default(uuid()) @db.Uuid
   user_id     String   @db.Uuid
   column_id   String   @db.Uuid
-  name String   @unique @db.VarChar
+  card_name String   @unique @db.VarChar
   description String   @db.VarChar
 
-  user     Users    @relation(fields: [user_id], references: [id])
-  column   Columns  @relation(fields: [column_id], references: [id])
+  user     Users    @relation(fields: [user_id], references: [user_id])
+  column   Columns  @relation(fields: [column_id], references: [column_id])
 
   comments Comments[]
 
@@ -51,16 +51,16 @@ model Cards {
 }
 
 model Comments {
-  id          String   @id @default(uuid()) @db.Uuid
+  comment_id          String   @id @default(uuid()) @db.Uuid
   user_id     String   @db.Uuid
   column_id   String   @db.Uuid
   card_id     String   @db.Uuid
-  name String   @unique @db.VarChar
+  comment_name String   @unique @db.VarChar
   description String   @db.VarChar
 
-  user     Users    @relation(fields: [user_id], references: [id])
-  column   Columns  @relation(fields: [column_id], references: [id])
-  card     Cards    @relation(fields: [card_id], references: [id])
+  user     Users    @relation(fields: [user_id], references: [user_id])
+  column   Columns  @relation(fields: [column_id], references: [column_id])
+  card     Cards    @relation(fields: [card_id], references: [card_id])
 
   @@map("Comments")
 }

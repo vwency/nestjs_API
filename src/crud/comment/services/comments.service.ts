@@ -4,36 +4,21 @@ import {
   NotFoundException,
   ParamData,
 } from '@nestjs/common';
-import { Users } from '../../../database/schema/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Columns } from 'src/database/schema/column.entity';
-import { Cards } from 'src/database/schema/card.entity';
-import { Comments } from 'src/database/schema/comment.entity';
 import { CommentDto } from '../dto/comment.dto';
-import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 import { ParamDtoComment } from '../dto/param.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CrudLogic } from 'src/crud/logic/crud.ts.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
-    @InjectRepository(Columns)
-    private readonly columnRepository: Repository<Columns>,
-    @InjectRepository(Cards)
-    private readonly cardRepository: Repository<Cards>,
-    @InjectRepository(Comments)
-    private readonly commentRepository: Repository<Comments>,
+    private prisma: PrismaService
   ) {}
 
   async getComment(params: ParamDtoComment): Promise<string> {
-    const crudLogic = new CrudLogic(
-      this.userRepository,
-      this.columnRepository,
-      this.cardRepository,
-      this.commentRepository
-    );
+    const crudLogic = new CrudLogic(this.prisma);
     const { column, card, comment } = await crudLogic.findColumnCardComment(
       params,
       true,
@@ -43,12 +28,7 @@ export class CommentsService {
   }
 
   async createComment(comDto: CommentDto): Promise<any> {
-    const crudLogic = new CrudLogic(
-      this.userRepository,
-      this.columnRepository,
-      this.cardRepository,
-      this.commentRepository,
-    );
+    const crudLogic = new CrudLogic(this.prisma);
     const { column, card, comment } = await crudLogic.findColumnCardComment(
       comDto,
       false,
@@ -63,12 +43,7 @@ export class CommentsService {
   }
 
   async deleteComment(params: ParamDtoComment): Promise<any> {
-    const crudLogic = new CrudLogic(
-      this.userRepository,
-      this.columnRepository,
-      this.cardRepository,
-      this.commentRepository,
-    );
+    const crudLogic = new CrudLogic(this.prisma);
     const { column, card, comment } = await crudLogic.findColumnCardComment(
       params,
       true,
@@ -80,12 +55,7 @@ export class CommentsService {
   }
 
   async updateComment(params: ParamDtoComment, updatePayload: Partial<Comments>) {
-    const crudLogic = new CrudLogic(
-      this.userRepository,
-      this.columnRepository,
-      this.cardRepository,
-      this.commentRepository,
-    );
+    const crudLogic = new CrudLogic(this.prisma);
     
     const { column, card, comment } = await crudLogic.findColumnCardComment(
       params,
